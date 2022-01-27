@@ -30,6 +30,8 @@ void importEvents();
 void importRecurs();
 void updateEvents();
 void updateRecurs();
+void printEvent(int);
+void printRecur(int);
 
 // pages and menus
 void mainMenu();
@@ -38,7 +40,10 @@ void mainMenu();
         void interactEvent(int);
             void deleteEvent(int);
             void editEvent(int);
-    void recurPagr();
+            void voteTime(int);
+            void voteLocation(int);
+        void passEvent();
+    void recurPage();
         void addRecur();
         void interactRecur(int);
             void deleteRecur(int);
