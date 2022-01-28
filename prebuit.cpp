@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <ctime>
 
 using namespace std;
@@ -9,19 +10,24 @@ class Event{
     public:
         time_t begin, end; // [start,stop)
         string name, author, location;
-        //bool isNotified;
 };
 
 class Recur{
     //Periodical events
     public:
-        // 'd' = daily, 'w' = weekly, 'm' = monthly, 'y' = yearly
         time_t begin, end;
-        char type;
+        char type; // 'd' = daily, 'w' = weekly, 'm' = monthly, 'y' = yearly
         string name, author, location;
+
+        void update();
 };
 
-//main Events and Periodical events
+void Recur::update(){
+
+}
+
+
+// global Events and Periodical events
 vector<Event> events;
 vector<Recur> recurs;
 
@@ -30,10 +36,15 @@ void importEvents();
 void importRecurs();
 void updateEvents();
 void updateRecurs();
+
+// miscellaneous functions, newer functions will be added here
 void printEvent(int);
 void printRecur(int);
+void sortEvent();
+void sortRecur();
+string toupperString(string);
 
-// pages and menus
+// interface : pages and menus
 void mainMenu();
     void eventPage();
         void addEvent();
