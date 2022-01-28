@@ -46,9 +46,6 @@ void sortEvent();
 void sortRecur();
 string toupperString(string);
 
-<<<<<<< HEAD
-// interface : pages and menus
-=======
 //print the result of matching 
 void PrintDate(vector<string> d,int N)
 {
@@ -77,9 +74,7 @@ void PrintDate(vector<string> d,int N)
 }
 
 
-
-// pages and menus
->>>>>>> abe4a4f45818b3cdacbad8c19cafdecf2dce7542
+// interface : pages and menus
 void mainMenu();
     void eventPage();
         void addEvent();
