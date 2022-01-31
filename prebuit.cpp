@@ -44,9 +44,18 @@ void printEvent(int);
 void printRecur(int);
 void sortEvent();
 void sortRecur();
-string toupperString(string);
 
-//print the result of matching 
+//Converting a String to Upper
+string toupperString(string x)
+{
+    for_each(x.begin(), x.end(), [](char & c) 
+    {
+        c = ::toupper(c);
+    });
+    return x;
+}
+
+//print Date the result of matching 
 void PrintDate(vector<string> d,int N)
 {
     map<string, int> freqMap;
@@ -96,7 +105,7 @@ int main()
     
     vector<string> Date;
     string InputDate;
-    fstream infile("filedate.txt");
+    fstream infile("filedateforprintdate.txt");
     
     //Input number of groups.
     cout << "Input the number of groups : ";
