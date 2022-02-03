@@ -470,9 +470,56 @@ void interactEvent(int i){
 
 // If possible, add these functions here!
 void editEvent(int i){
+
+    int number ;
+    string name,author,location ;
+    Event event ;
+    cout << "| To edit name     Press 1 |" << endl ;
+    cout << "| To edit author   Press 2 |" << endl ;
+    cout << "| To edit location Press 3 |" << endl ;
+   
+    cout << "Press number: "  ;
+    cin >> number ;
+    cin.ignore() ;
+
+    switch(number){
+        case 1 :
+            cout << "Enter event name that you want to edit: " ;
+            getline(cin,name) ;
+            event.name = name ;
+            break ;
+        case 2 :
+            cout << "Enter event author that you want to edit: " ;
+            getline(cin,author) ;
+            event.author = author ;
+            break ;
+        case 3 :
+            cout << "Enter event author that you want to edit: " ;
+            getline(cin,location) ;
+            event.location = location ;
+            break ;
+        default :
+            cout << "Invalid input Please try again" ;
+
+    }
+    
+    for(int b = 0;b < events.size(); b++){
+        if(b == i){
+            events.erase(events.begin()+i) ;
+            events.insert(events.begin()+i,event) ;
+        }
+    }  
+
 }
 
 void deleteEvent(int i){
+    
+    for(int a = 0;a < events.size(); a++){
+        if(a == i){
+            events.erase(events.begin()+i) ;
+        }
+    }  
+
 }
 
 void voteTime(int i){
