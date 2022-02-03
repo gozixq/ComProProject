@@ -31,37 +31,38 @@ void Recur::update(){
     tm temp = *localtime(&begin);
     tm currentTM = *localtime(&currentTime);
 
-    // NEED OPTIMIZATION!!!
-    if(type == 'd'){
-        temp.tm_year = currentTM.tm_year;
-        temp.tm_mon = currentTM.tm_mon;
-        temp.tm_mday = currentTM.tm_mday;
-        if(temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 1;
-
-    }else if(type == 'w'){
+    temp.tm_year = currentTM.tm_year;
+    switch(type){
+    case 'w':
         int diff = currentTM.tm_wday - temp.tm_wday;
         if(diff > 0) diff -= 7;
-        temp.tm_year = currentTM.tm_year;
         temp.tm_mon = currentTM.tm_mon;
         temp.tm_mday = currentTM.tm_mday - diff;
         if(diff == 0 && temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 7;
+        break;
 
-    }else if(type == 'm'){
-        temp.tm_year = currentTM.tm_year;
+    case 'd':
+        temp.tm_mon = currentTM.tm_mon;
+        temp.tm_mday = currentTM.tm_mday;
+        if(temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 1;
+        break;
+    
+    case 'm':
         temp.tm_mon = currentTM.tm_mon;
         if (temp.tm_mday < currentTM.tm_mday) temp.tm_mon += 1;
         else if (temp.tm_mday == currentTM.tm_mday){
-            if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1;
+            if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1
         }
-
-    }else if(type == 'y'){
-        temp.tm_year = currentTM.tm_year;
+        break;
+    
+    case 'y':
         if (temp.tm_mon < currentTM.tm_mon) temp.tm_year += 1;
         else if (temp.tm_mon == currentTM.tm_mon){
             if (temp.tm_mday < currentTM.tm_mday) temp.tm_year += 1;
             else if (temp.tm_mday == currentTM.tm_mday){
                 if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_year += 1;
             }
+            break;
         }
     }
 
@@ -167,7 +168,21 @@ int main()
     
     PrintDate(Date,N);
 
+/*
+    importEvents();
+    importRecurs();
 
+    for(unsigned int i = 0; i < recurs.size(); i++) {recurs[i].update();}
+
+    sortEvent();
+    sortRecur();
+
+    system("CLS");
+    mainMenu();
+    system("CLS");
+
+    return 0;
+*/
 
 }
 
@@ -277,6 +292,7 @@ void addEvent(){
             }
         }
 
+        // recieving inputs
         switch(stage){
         case 0:
             cout << "Enter the beginning hour : ";
@@ -306,6 +322,7 @@ void addEvent(){
         sso << element;
         for(int i = stage; sso >> mark[i] && stage < 7; i++) stage++;
 
+        // checking invalid inputs
         for(int i = 0; i < stage; i++){
             switch(i){
             case 0:
@@ -358,10 +375,13 @@ void addEvent(){
                 break; 
             }
         }
+
+        // checking if the program can break the loop
         if(stage > 6) goto exit_loop0;
     }
     exit_loop0: ;
 
+    // converting to Event
     temp.tm_hour = mark[0];
     temp.tm_min = mark[1];
     temp.tm_mday = mark[4];
@@ -371,6 +391,7 @@ void addEvent(){
     temp.tm_year -= 1900;
     adding.begin = mktime(&temp);
 
+    if(mark[0] + mark[1]/60. > mark[2] + mark[3]/60.) mark[4] += 1;
     temp.tm_hour = mark[2];
     temp.tm_min = mark[3];
     adding.end = mktime(&temp);
@@ -567,6 +588,7 @@ void addRecur(){
             }
         }
 
+        // recieving inputs
         switch(stage){
         case 0:
             cout << "Enter the beginning hour : ";
@@ -665,23 +687,22 @@ void addRecur(){
             }
         }
 
+        // checking if the program can break the loop
         switch(adding.type){
         case 'd':
             if(stage > 3) goto exit_loop2;
-            break;
 
         case 'w':
         case 'm':
             if(stage > 4) goto exit_loop2;
-            break;
 
         case 'y':
             if(stage > 5) goto exit_loop2;
-            break;
         }
     }
     exit_loop2: ;
 
+    // converting to Recur
     temp.tm_hour = mark[0];
     temp.tm_min = mark[1];
     if(adding.type != 'd' && adding.type != 'w') temp.tm_mday = mark[4];
@@ -699,6 +720,7 @@ void addRecur(){
 
     adding.begin = mktime(&temp);
 
+    if(mark[0] + mark[1]/60. > mark[2] + mark[3]/60.) mark[4] += 1;
     temp.tm_hour = mark[2];
     temp.tm_min = mark[3];
     adding.end = mktime(&temp);
