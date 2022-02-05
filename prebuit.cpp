@@ -30,11 +30,12 @@ void Recur::update(){
     time_t currentTime = time(0);
     tm temp = *localtime(&begin);
     tm currentTM = *localtime(&currentTime);
+    int diff;
 
     temp.tm_year = currentTM.tm_year;
     switch(type){
     case 'w':
-        int diff = currentTM.tm_wday - temp.tm_wday;
+        diff = currentTM.tm_wday - temp.tm_wday;
         if(diff > 0) diff -= 7;
         temp.tm_mon = currentTM.tm_mon;
         temp.tm_mday = currentTM.tm_mday - diff;
@@ -51,7 +52,7 @@ void Recur::update(){
         temp.tm_mon = currentTM.tm_mon;
         if (temp.tm_mday < currentTM.tm_mday) temp.tm_mon += 1;
         else if (temp.tm_mday == currentTM.tm_mday){
-            if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1
+            if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1;
         }
         break;
     
@@ -66,7 +67,7 @@ void Recur::update(){
         }
     }
 
-    int diff = difftime(end, begin);
+    diff = difftime(end, begin);
     begin = mktime(&temp);
     end = begin + diff;
 }
@@ -317,63 +318,42 @@ void addEvent(){
             break;    
         }
 
-        getline(cin,element);
+        element.clear();
         sso.clear();
+        getline(cin,element);
         sso << element;
         for(int i = stage; sso >> mark[i] && stage < 7; i++) stage++;
 
         // checking invalid inputs
         for(int i = 0; i < stage; i++){
+            if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
+            else if(i == 6) {if(mark[6] > 1970) continue;}
+            else if(mark[i] >= 0) continue;
             switch(i){
             case 0:
-                if(mark[0] >= 0) break;
                 cout << "Beginning hour must be a number more or equal to 0.\n";
-                stage = 0;
-                for(int j = 0; j < 6; j++) mark[j] = INT_MIN;
                 break;
-
             case 1:
-                if(mark[1] >= 0) break;
                 cout << "Beginning minute must be a number more or equal to 0.\n";
-                stage = 1;
-                for(int j = 1; j < 6; j++) mark[j] = INT_MIN;
                 break;
-
             case 2:
-                if(mark[2] >= 0) break;
                 cout << "Ending hour must be a number more or equal to 0.\n";
-                stage = 2;
-                for(int j = 2; j < 6; j++) mark[j] = INT_MIN;
                 break;
-
             case 3:
-                if(mark[3] >= 0) break;
                 cout << "Ending minute must be a number more or equal to 0.\n";
-                stage = 3;
-                for(int j = 3; j < 6; j++) mark[j] = INT_MIN;
                 break;
-            
             case 4:
-                if(mark[4] >= 0) break;
-                cout << "Event date must be a number more or equal to 0.\n";
-                stage = 4;
-                for(int j = 4; j < 6; j++) mark[j] = INT_MIN;
+                cout << "Event date must be a number more than 0.\n";
                 break;
-
             case 5:
-                if(mark[5] > 0) break;
                 cout << "Event month must be a number more than 0.\n";
-                stage = 5;
-                for(int j = 5; j < 6; j++) mark[j] = INT_MIN;
                 break;
-
             case 6:
-                if(mark[6] > 1970) break;
                 cout << "Event year must be a number more than 1970.\n";
-                stage = 6;
-                for(int j = 6; j < 6; j++) mark[j] = INT_MIN;
                 break; 
             }
+            stage = i;
+            for(int j = i; i < 6; i++) mark[j] = INT_MIN;
         }
 
         // checking if the program can break the loop
@@ -382,6 +362,7 @@ void addEvent(){
     exit_loop0: ;
 
     // converting to Event
+    temp.tm_sec = 0;
     temp.tm_hour = mark[0];
     temp.tm_min = mark[1];
     temp.tm_mday = mark[4];
@@ -589,15 +570,14 @@ void addRecur(){
     string element;
     stringstream sso;
 
+    cout << "Enter the type of recursion\n\n";
+    cout << "For daily,     enter 1\n";
+    cout << "For weekly,    enter 2\n";
+    cout << "For monthly,   enter 3\n";
+    cout << "For yearly,    enter 4\n";
+    cout << "-----------------------------------------------------------------------\n";
+    cout << "Your input : ";
     while(true){
-        cout << "Enter the type of recursion\n\n";
-        cout << "For daily,     enter 1\n";
-        cout << "For weekly,    enter 2\n";
-        cout << "For monthly,   enter 3\n";
-        cout << "For yearly,    enter 4\n";
-        cout << "-----------------------------------------------------------------------\n";
-        cout << "Your input : ";
-
         getline(cin,element);
         switch(atoi(element.c_str())){
         case 1:
@@ -684,72 +664,67 @@ void addRecur(){
 
         // checking invalid inputs
         for(int i = 0; i < stage; i++){
-            switch(i){
-            case 0:
-                if(mark[0] >= 0) break;
-                cout << "Beginning hour must be a number more or equal to 0.\n";
-                stage = 0;
-                for(int j = 0; j < 6; j++) mark[j] = INT_MIN;
-                break;
-
-            case 1:
-                if(mark[1] >= 0) break;
-                cout << "Beginning minute must be a number more or equal to 0.\n";
-                stage = 1;
-                for(int j = 1; j < 6; j++) mark[j] = INT_MIN;
-                break;
-
-            case 2:
-                if(mark[2] >= 0) break;
-                cout << "Ending hour must be a number more or equal to 0.\n";
-                stage = 2;
-                for(int j = 2; j < 6; j++) mark[j] = INT_MIN;
-                break;
-
-            case 3:
-                if(mark[3] >= 0) break;
-                cout << "Ending minute must be a number more or equal to 0.\n";
-                stage = 3;
-                for(int j = 3; j < 6; j++) mark[j] = INT_MIN;
-                break;
-            
-            case 4:
-                if(adding.type == 'w' && (mark[4] < 1 || mark[4] > 7)){
+            if(i == 4 && adding.type == 'w'){
+                if(mark[4] >= 1 && mark[4] <= 7) continue;
+                else{
                     cout << "Event weekday must be a number between 1 to 7.\n";
                     stage = 4;
                     for(int j = 4; j < 6; j++) mark[j] = INT_MIN;
-                }else if(adding.type != 'd' && mark[4] < 0){
-                    cout << "Event date must be a number more or equal to 0.\n";
-                    stage = 4;
-                    for(int j = 4; j < 6; j++) mark[j] = INT_MIN;
+                    continue;
                 }
+            }
+            else if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
+            else if(mark[i] >= 0) continue;
+            switch(i){
+            case 0:
+                cout << "Beginning hour must be a number more or equal to 0.\n";
+                break;
+
+            case 1:
+                cout << "Beginning minute must be a number more or equal to 0.\n";
+                break;
+
+            case 2:
+                cout << "Ending hour must be a number more or equal to 0.\n";
+                break;
+
+            case 3:
+                cout << "Ending minute must be a number more or equal to 0.\n";
+                break;
+            
+            case 4:
+                if(adding.type == 'd') break;
+                cout << "Event date must be a number more than 0.\n";
                 break;
 
             case 5:
-                if(adding.type != 'y' || mark[5] >= 0) break;
+                if(adding.type != 'y') break;
                 cout << "Event month must be a number more than 0.\n";
-                stage = 5;
-                for(int j = 5; j < 6; j++) mark[j] = INT_MIN;
                 break;
             }
+            stage = i;
+            for(int j = i; j < 6; j++) mark[j] = INT_MIN;
         }
 
-        // checking if the program can break the loop
         switch(adding.type){
         case 'd':
             if(stage > 3) goto exit_loop2;
+            break;
 
         case 'w':
         case 'm':
             if(stage > 4) goto exit_loop2;
+            break;
 
         case 'y':
             if(stage > 5) goto exit_loop2;
+            break;
         }
     }
     exit_loop2: ;
 
-    // converting to Recur
+    // converting to Recur  
+    temp.tm_sec = 0;
     temp.tm_hour = mark[0];
     temp.tm_min = mark[1];
     if(adding.type != 'd' && adding.type != 'w') temp.tm_mday = mark[4];
@@ -760,14 +735,13 @@ void addRecur(){
         temp.tm_mday -= diff;
     }
 
-    if(adding.type == 'y') {
+    if(adding.type == 'y'){
         temp.tm_mon = mark[5];
         temp.tm_mon--;
     }
 
     adding.begin = mktime(&temp);
 
-    if(mark[0] + mark[1]/60. > mark[2] + mark[3]/60.) mark[4] += 1;
     temp.tm_hour = mark[2];
     temp.tm_min = mark[3];
     adding.end = mktime(&temp);
