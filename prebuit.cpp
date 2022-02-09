@@ -84,10 +84,34 @@ void updateEvents();
 void updateRecurs();
 
 // miscellaneous functions, newer functions will be added here
-void printEvent(int);
-void printRecur(int);
-void sortEvent();
 void sortRecur();
+
+// ก่อนเรียกใช้ให้input data from txt เก็บในVector 
+//และหาความยาวจากint x = sizeof(arr)/sizeof(arr[0]);
+void printRecur(vector<string> d,int N)
+{
+    map<string, int> freqMap;
+       
+        for (auto& element : d) {
+            auto res
+                = freqMap.insert(pair<string, int>(element, 1));
+            if (res.second == false)
+                res.first->second++;
+                
+        }
+
+        for (auto& element : freqMap) 
+        {
+            if (element.second == N) 
+            {
+                cout << element.first << " " ;
+            }
+            
+        }
+
+}
+
+
 
 struct Date
 {
@@ -110,7 +134,7 @@ bool compare(const Date &d1, const Date &d2)
 }
 
 // ก่อนเรียกใช้ให้input data from txt เก็บในลิส 
-//และหาความยาวลิสจากint x = sizeof(arr)/sizeof(arr[0]);
+//และให้รับค่าinputค่าจำนวนคนในกลุ่มจากผู้ใช้เก็บในค่า n;
 void sortEvent(Date arr[],int n)
 {
     
@@ -129,6 +153,7 @@ void printEvent(Date arr[],int n)
        cout << endl;
     }
 }
+
 
 //Converting a String to Upper
 string toupperString(string x)
