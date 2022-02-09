@@ -89,6 +89,47 @@ void printRecur(int);
 void sortEvent();
 void sortRecur();
 
+struct Date
+{
+    int day, month, year;
+    string event;
+};
+
+bool compare(const Date &d1, const Date &d2)
+{
+    
+    if (d1.year < d2.year)
+        return true;
+    if (d1.year == d2.year && d1.month < d2.month)
+        return true;
+    if (d1.year == d2.year && d1.month == d2.month &&
+                              d1.day < d2.day)
+        return true;
+  
+    return false;
+}
+
+// ก่อนเรียกใช้ให้input data from txt เก็บในลิส 
+//และหาความยาวลิสจากint x = sizeof(arr)/sizeof(arr[0]);
+void sortEvent(Date arr[],int n)
+{
+    
+    sort(arr, arr+n, compare);
+}
+
+void printEvent(Date arr[],int n)
+{
+    
+    
+    cout << "Sorted event : " << endl;
+    for (int i=0; i<n; i++)
+    {
+       cout << arr[i].day << " " << arr[i].month
+            << " " << arr[i].year << " " << arr[i].event;
+       cout << endl;
+    }
+}
+
 //Converting a String to Upper
 string toupperString(string x)
 {
@@ -100,6 +141,7 @@ string toupperString(string x)
 }
 
 //print Date the result of matching 
+//จะลบก็ได้นะซ้ำกับRecur
 void PrintDate(vector<string> d,int N)
 {
     map<string, int> freqMap;
