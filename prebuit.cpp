@@ -869,7 +869,55 @@ void interactRecur(int i){
 
 // If possible, add these functions here!
 void editRecur(int i){
+    
+    int number ;
+    string name,author,location ;
+    Recur recur ;
+    cout << "| To edit name     Press 1 |" << endl ;
+    cout << "| To edit author   Press 2 |" << endl ;
+    cout << "| To edit location Press 3 |" << endl ;
+   
+    cout << "Press number: "  ;
+    cin >> number ;
+    cin.ignore() ;
+
+    switch(number){
+        case 1 :
+            cout << "Enter event name that you want to edit: " ;
+            getline(cin,name) ;
+            recur.name = name ;
+            break ;
+        case 2 :
+            cout << "Enter event author that you want to edit: " ;
+            getline(cin,author) ;
+            recur.author = author ;
+            break ;
+        case 3 :
+            cout << "Enter event location that you want to edit: " ;
+            getline(cin,location) ;
+            recur.location = location ;
+            break ;
+        default :
+            cout << "Invalid input Please try again" ;
+
+    }
+    
+    for(int f = 0;f < recurs.size(); f++){
+        if(f == i){
+            recurs.erase(recurs.begin()+i) ;
+            recurs.insert(recurs.begin()+i,recur) ;
+        }
+    }  
+
+
 }
 
 void deleteRecur(int i){
+
+    for(int e = 0;e < recurs.size(); e++){
+        if(e == i){
+            recurs.erase(recurs.begin()+i) ;
+        }
+    }  
+
 }
