@@ -192,7 +192,8 @@ void PrintDate(vector<string> d,int N)
             
         }
 }
-
+vector<int> vote1 ;
+vector<int> vote2 ;
 
 // interface : pages and menus
 void mainMenu();
@@ -551,29 +552,63 @@ void editEvent(int i){
 
     }
     
-    for(int b = 0;b < events.size(); b++){
-        if(b == i){
-            events.erase(events.begin()+i) ;
-            events.insert(events.begin()+i,event) ;
-        }
-    }  
+  
+    events.erase(events.begin()+i) ;
+    events.insert(events.begin()+i,event) ;
+      
 
 }
 
 void deleteEvent(int i){
     
-    for(int a = 0;a < events.size(); a++){
-        if(a == i){
-            events.erase(events.begin()+i) ;
-        }
-    }  
-
+    events.erase(events.begin()+i) ;
+     
 }
 
 void voteTime(int i){
+
+
 }
 
 void voteLocation(int i){
+
+    int number ;
+    string choice ;
+    cout << "Please enter the number for vote " << events[i].location << endl ;
+    cout << "Press 1 for agree" << endl ;
+    cout << "Press 2 for disagree" << endl ;
+    do{
+        cout << "the number that you choose: " ;  
+        cin >> number ;
+        if(number != 1 && number != 2 ){
+            cout << "Invalid input,Please try again" << endl ;
+        }
+    }while(number != 1 && number != 2);
+    
+
+    if(number == 1){
+        cout << "You vote agree to " << events[i].location << endl ;
+        vote1.push_back(1) ;
+    }
+    if(number == 2){
+        cout << "You vote disagree to " << events[i].location << endl ;
+        vote2.push_back(2) ;
+    }
+    
+    cout << "Do you want to see the result? (y/n) :" ;
+    cin >> choice ;
+
+    if(choice == "y"){
+        cout << "-------------------------------------------" << endl ;
+        cout << "\t\tVote Results" << endl ;
+        cout << "Votes of agree got " <<  vote1.size() << endl ;
+        cout <<  "Votes of disagree got " << vote2.size() << endl ;
+        cout << "-------------------------------------------" << endl ;
+    }
+   
+
+
+
 }
 
 void passEvent(){
@@ -902,22 +937,18 @@ void editRecur(int i){
 
     }
     
-    for(int f = 0;f < recurs.size(); f++){
-        if(f == i){
-            recurs.erase(recurs.begin()+i) ;
-            recurs.insert(recurs.begin()+i,recur) ;
-        }
-    }  
+    
+    recurs.erase(recurs.begin()+i) ;
+    recurs.insert(recurs.begin()+i,recur) ;
+     
 
 
 }
 
 void deleteRecur(int i){
 
-    for(int e = 0;e < recurs.size(); e++){
-        if(e == i){
-            recurs.erase(recurs.begin()+i) ;
-        }
-    }  
+    
+    recurs.erase(recurs.begin()+i) ;
+      
 
 }
