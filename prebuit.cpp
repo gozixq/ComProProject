@@ -1,77 +1,15 @@
-#include <iostream>
+#include "events.h" // All the commented libraries are already exist in events.h
+//#include <iostream>
 #include <cstdlib>
-#include <vector>
-#include <string>
-#include <sstream>
+//#include <vector>
+//#include <string>
+//#include <sstream>
 #include <fstream>
-#include <ctime>
+//#include <ctime>
 #include <bits/stdc++.h>
 #include <map>
 
 using namespace std;
-
-class Event{
-    public:
-        time_t begin, end; // [start,stop)
-        string name, author, location;
-};
-
-class Recur{
-    //Periodical events
-    public:
-        time_t begin, end;
-        char type; // 'd' = daily, 'w' = weekly, 'm' = monthly, 'y' = yearly
-        string name, author, location;
-
-        void update();
-};
-
-void Recur::update(){
-    time_t currentTime = time(0);
-    tm temp = *localtime(&begin);
-    tm currentTM = *localtime(&currentTime);
-    int diff;
-
-    temp.tm_year = currentTM.tm_year;
-    switch(type){
-    case 'w':
-        diff = currentTM.tm_wday - temp.tm_wday;
-        if(diff > 0) diff -= 7;
-        temp.tm_mon = currentTM.tm_mon;
-        temp.tm_mday = currentTM.tm_mday - diff;
-        if(diff == 0 && temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 7;
-        break;
-
-    case 'd':
-        temp.tm_mon = currentTM.tm_mon;
-        temp.tm_mday = currentTM.tm_mday;
-        if(temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 1;
-        break;
-    
-    case 'm':
-        temp.tm_mon = currentTM.tm_mon;
-        if (temp.tm_mday < currentTM.tm_mday) temp.tm_mon += 1;
-        else if (temp.tm_mday == currentTM.tm_mday){
-            if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1;
-        }
-        break;
-    
-    case 'y':
-        if (temp.tm_mon < currentTM.tm_mon) temp.tm_year += 1;
-        else if (temp.tm_mon == currentTM.tm_mon){
-            if (temp.tm_mday < currentTM.tm_mday) temp.tm_year += 1;
-            else if (temp.tm_mday == currentTM.tm_mday){
-                if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_year += 1;
-            }
-            break;
-        }
-    }
-
-    diff = difftime(end, begin);
-    begin = mktime(&temp);
-    end = begin + diff;
-}
-
 
 // global Events and Periodical events
 vector<Event> events;
@@ -165,11 +103,6 @@ string toupperString(string x)
     return x;
 }
 
-bool is_number(const std::string& s){
-    return !s.empty() && std::find_if(s.begin(), 
-        s.end(), [](unsigned char c) { return !(c >= '0' && c <= '9' || c == ' ' || c == '-');}) == s.end();
-}
-
 //print Date the result of matching 
 //จะลบก็ได้นะซ้ำกับRecur
 void PrintDate(vector<string> d,int N)
@@ -197,6 +130,7 @@ void PrintDate(vector<string> d,int N)
             
         }
 }
+
 vector<int> vote1 ;
 vector<int> vote2 ;
 
@@ -360,123 +294,30 @@ void eventPage(){
 }
 
 void addEvent(){
-    tm temp;
+    Event adding;
     int mark[7] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
     //begin hr, begin min, end hr, end min, date, month, year
     int stage;
-    Event adding;
-    string element;
-    stringstream sso;
 
-    while(true){
-        for(int i = 0; i < 7; i++){
-            if(mark[i] == INT_MIN){
-                stage = i;
-                break;
-            }
-        }
+    cinMark(mark, stage);
 
-        // recieving inputs
-        switch(stage){
-        case 0:
-            cout << "|  Enter beginning hour  | : ";
-            break;
-        case 1:
-            cout << "| Enter beginning minute | : ";
-            break;
-        case 2:
-            cout << "|   Enter ending hour    | : ";
-            break;
-        case 3: 
-            cout << "|  Enter ending minute   | : ";
-            break;
-        case 4:
-            cout << "|       Enter date       | : ";
-            break;
-        case 5:
-            cout << "|       Enter month      | : ";
-            break;
-        case 6:
-            cout << "|       Enter year       | : ";
-            break;    
-        }
+    adding = MarkToEvent(mark);
 
-        element.clear();
-        sso.clear();
-        getline(cin,element);
-
-        if(!is_number(element)){
-            cout << "Input must not contain letters.\n";
-            continue;
-        }
-
-        sso << element;
-        for(int i = stage; sso >> mark[i] && stage < 7; i++) stage++;
-
-        // checking invalid inputs
-        for(int i = 0; i < stage; i++){
-            if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
-            else if(i == 6) {if(mark[6] > 1970) continue;}
-            else if(mark[i] >= 0) continue;
-            switch(i){
-            case 0:
-                cout << "Beginning hour must be a number more or equal to 0.\n";
-                break;
-            case 1:
-                cout << "Beginning minute must be a number more or equal to 0.\n";
-                break;
-            case 2:
-                cout << "Ending hour must be a number more or equal to 0.\n";
-                break;
-            case 3:
-                cout << "Ending minute must be a number more or equal to 0.\n";
-                break;
-            case 4:
-                cout << "Event date must be a number more than 0.\n";
-                break;
-            case 5:
-                cout << "Event month must be a number more than 0.\n";
-                break;
-            case 6:
-                cout << "Event year must be a number more than 1970.\n";
-                break; 
-            }
-            stage = i;
-            for(int j = i; i < 6; i++) mark[j] = INT_MIN;
-        }
-
-        // checking if the program can break the loop
-        if(stage > 6) goto exit_loop_addEvent;
+    if(isConflicted(adding,events)){
+        string ensure;
+        cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
+        cout << "| For not continuing    Enter no      |\n";
+        cout << "| For yes               Enter any key |\n";
+        cout << "-----------------------------------------------------------------------\n";
+        getline(cin,ensure);
+        ensure = toupperString(ensure);
+        
+        if(ensure == "NO") return;
     }
-    exit_loop_addEvent: ;
 
-    // converting to Event
-    temp.tm_sec = 0;
-    temp.tm_hour = mark[0];
-    temp.tm_min = mark[1];
-    temp.tm_mday = mark[4];
-    temp.tm_mon = mark[5];
-    temp.tm_year = mark[6];
-    temp.tm_mon--;
-    temp.tm_year -= 1900;
-    adding.begin = mktime(&temp);
-
-    if(mark[0] + mark[1]/60. > mark[2] + mark[3]/60.) mark[4] += 1;
-    temp.tm_hour = mark[2];
-    temp.tm_min = mark[3];
-    adding.end = mktime(&temp);
-
-    cout << "|   Enter name   | : ";
-    getline(cin, element);
-    adding.name = element;
-
-    cout << "|  Enter author  | : ";
-    getline(cin, element);
-    adding.author = element;
-
-    cout << "| Enter location | : ";
-    getline(cin, element);
-    adding.location = element;
+    adding.name = cinName();
+    adding.author = cinAuthor();
+    adding.location = cinLocation();
 
     events.push_back(adding);
 }
@@ -555,116 +396,32 @@ void editEvent(int i){
         else cout << "Invalid input Please try again: " ;
     }
 
-    tm temp;
     int mark[7] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
     //begin hr, begin min, end hr, end min, date, month, year
     int stage;
     Event editing;
-    string element;
-    stringstream sso;
 
     switch(number){
         case 1 :
             cout << "\n\n";
-            editing = events[i];
-            while(true){
-                for(int i = 0; i < 7; i++){
-                    if(mark[i] == INT_MIN){
-                        stage = i;
-                        break;
-                    }
-                }
+            cinMark(mark,stage);
 
-                // recieving inputs
-                switch(stage){
-                case 0:
-                    cout << "|  Enter beginning hour  | : ";
-                    break;
-                case 1:
-                    cout << "| Enter beginning minute | : ";
-                    break;
-                case 2:
-                    cout << "|   Enter ending hour    | : ";
-                    break;
-                case 3: 
-                    cout << "|  Enter ending minute   | : ";
-                    break;
-                case 4:
-                    cout << "|       Enter date       | : ";
-                    break;
-                case 5:
-                    cout << "|       Enter month      | : ";
-                    break;
-                case 6:
-                    cout << "|       Enter year       | : ";
-                    break;    
-                }
+            editing = MarkToEvent(mark);
 
-                element.clear();
-                sso.clear();
-                getline(cin,element);
-
-                if(!is_number(element)){
-                    cout << "Input must not contain letters.\n";
-                    continue;
-                }
-
-                sso << element;
-                for(int i = stage; sso >> mark[i] && stage < 7; i++) stage++;
-
-                // checking invalid inputs
-                for(int i = 0; i < stage; i++){
-                    if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
-                    else if(i == 6) {if(mark[6] > 1970) continue;}
-                    else if(mark[i] >= 0) continue;
-                    switch(i){
-                    case 0:
-                        cout << "Beginning hour must be a number more or equal to 0.\n";
-                        break;
-                    case 1:
-                        cout << "Beginning minute must be a number more or equal to 0.\n";
-                        break;
-                    case 2:
-                        cout << "Ending hour must be a number more or equal to 0.\n";
-                        break;
-                    case 3:
-                        cout << "Ending minute must be a number more or equal to 0.\n";
-                        break;
-                    case 4:
-                        cout << "Event date must be a number more than 0.\n";
-                        break;
-                    case 5:
-                        cout << "Event month must be a number more than 0.\n";
-                        break;
-                    case 6:
-                        cout << "Event year must be a number more than 1970.\n";
-                        break; 
-                    }
-                    stage = i;
-                    for(int j = i; i < 6; i++) mark[j] = INT_MIN;
-                }
-
-                // checking if the program can break the loop
-                if(stage > 6) goto exit_loop_editEvent;
+            if(isConflicted(editing,events)){
+                string ensure;
+                cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
+                cout << "| For not continuing    Enter no      |\n";
+                cout << "| For yes               Enter any key |\n";
+                cout << "-----------------------------------------------------------------------\n";
+                getline(cin,ensure);
+                ensure = toupperString(ensure);
+                
+                if(ensure == "NO") return;
             }
-            exit_loop_editEvent: ;
 
-            // converting to Event
-            temp.tm_sec = 0;
-            temp.tm_hour = mark[0];
-            temp.tm_min = mark[1];
-            temp.tm_mday = mark[4];
-            temp.tm_mon = mark[5];
-            temp.tm_year = mark[6];
-            temp.tm_mon--;
-            temp.tm_year -= 1900;
-            editing.begin = mktime(&temp);
-
-            if(mark[0] + mark[1]/60. > mark[2] + mark[3]/60.) mark[4] += 1;
-            temp.tm_hour = mark[2];
-            temp.tm_min = mark[3];
-            editing.end = mktime(&temp);
-            events[i] = editing;
+            events[i].begin = editing.begin;
+            events[i].end = editing.end;
             break;
 
         case 2 :
@@ -734,12 +491,9 @@ void voteLocation(int i){
 
 void passEvent(){
     time_t currentTime = time(0);
-    for(unsigned int i = 0; i < events.size(); i++){
-        if(difftime(currentTime, events[i].end) > 0) {
-            events.erase(events.begin() + i);
-            i--;
-        }
-    }
+    vector<Event>::iterator ptr = remove_if(events.begin(),events.end(),
+        [&currentTime](Event test) {return (difftime(currentTime, test.end) > 0);});
+    events.erase(ptr,events.end());
 }
 
 void recurPage(){
@@ -791,203 +545,34 @@ void recurPage(){
 }
 
 void addRecur(){
-    time_t currentTime = time(0);
-    tm temp = *localtime(&currentTime);
     Recur adding;
-    string element;
-    stringstream sso;
 
-    cout << "| Enter recursion type |\n\n";
-    cout << "| For daily      Enter 1 |\n";
-    cout << "| For weekly     Enter 2 |\n";
-    cout << "| For monthly    Enter 3 |\n";
-    cout << "| For yearly     Enter 4 |\n";
-    cout << "-----------------------------------------------------------------------\n";
-    cout << "Your input : ";
-    while(true){
-        getline(cin,element);
-        switch(atoi(element.c_str())){
-        case 1:
-            adding.type = 'd';
-            goto exit_loop_addRecur1;
-        
-        case 2:
-            adding.type = 'w';
-            goto exit_loop_addRecur1;
-
-        case 3:
-            adding.type = 'm';
-            goto exit_loop_addRecur1;
-
-        case 4:
-            adding.type = 'y';
-            goto exit_loop_addRecur1;
-        
-        default:
-            cout << "\nInvalid input Please try again: ";
-        }
-    }
-    exit_loop_addRecur1: ;
+    adding.type = cinType();
 
     int stage;
     int mark[6] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
     //begin hr, begin min, end hr, end min, date, month
     cout << '\n';
 
-    while(true){
-        for(int i = 0; i < 6; i++){
-            if(mark[i] == INT_MIN){
-                stage = i;
-                break;
-            }
-        }
+    cinMark(mark,stage,adding.type);
 
-        // recieving inputs
-        switch(stage){
-            case 0:
-                cout << "|  Enter beginning hour  | : ";
-                break;
-            case 1:
-                cout << "| Enter beginning minute | : ";
-                break;
-            case 2:
-                cout << "|   Enter ending hour    | : ";
-                break;
-            case 3: 
-                cout << "|  Enter ending minute   | : ";
-                break;
-        case 4:
-            switch(adding.type){
-            case 'w':
-                cout << "| Enter weekday |\n";
-                cout << "| For Sunday       Enter 1 |\n";
-                cout << "| For Monday       Enter 2 |\n";
-                cout << "| For Tuesday      Enter 3 |\n";
-                cout << "| For Wednesday    Enter 4 |\n";
-                cout << "| For Thursday     Enter 5 |\n";
-                cout << "| For Friday       Enter 6 |\n";
-                cout << "| For Saturday     Enter 7 |\n";
-                cout << "-----------------------------------------------------------------------\n";
-                cout << "Your input : ";
-                break;
+    adding = MarkToRecur(mark,adding.type);
 
-            case 'm':
-            case 'y':
-                cout << "|       Enter date       | : ";
-            }
-            break;
-        case 5:
-            cout << "|       Enter month      | : ";
-            break;
-        }
-
-        getline(cin,element);
-
-        if(!is_number(element)){
-            cout << "Input must not contain letters.\n";
-            continue;
-        }
-
-        sso.clear();
-        sso << element;
-        for(int i = stage; sso >> mark[i] && stage < 6; i++) stage++;
-
-        // checking invalid inputs
-        for(int i = 0; i < stage; i++){
-            if(i == 4 && adding.type == 'w'){
-                if(mark[4] >= 1 && mark[4] <= 7) continue;
-                else{
-                    cout << "Event weekday must be a number between 1 to 7.\n";
-                    stage = 4;
-                    for(int j = 4; j < 6; j++) mark[j] = INT_MIN;
-                    break;
-                }
-            }
-            else if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
-            else if(mark[i] >= 0) continue;
-            switch(i){
-            case 0:
-                cout << "Beginning hour must be a number more or equal to 0.\n";
-                break;
-
-            case 1:
-                cout << "Beginning minute must be a number more or equal to 0.\n";
-                break;
-
-            case 2:
-                cout << "Ending hour must be a number more or equal to 0.\n";
-                break;
-
-            case 3:
-                cout << "Ending minute must be a number more or equal to 0.\n";
-                break;
-            
-            case 4:
-                if(adding.type == 'd') break;
-                cout << "Event date must be a number more than 0.\n";
-                break;
-
-            case 5:
-                if(adding.type != 'y') break;
-                cout << "Event month must be a number more than 0.\n";
-                break;
-            }
-            stage = i;
-            for(int j = i; j < 6; j++) mark[j] = INT_MIN;
-        }
-
-        switch(adding.type){
-        case 'd':
-            if(stage > 3) goto exit_loop_addRecur2;
-            break;
-
-        case 'w':
-        case 'm':
-            if(stage > 4) goto exit_loop_addRecur2;
-            break;
-
-        case 'y':
-            if(stage > 5) goto exit_loop_addRecur2;
-            break;
-        }
-    }
-    exit_loop_addRecur2: ;
-
-    // converting to Recur  
-    temp.tm_sec = 0;
-    temp.tm_hour = mark[0];
-    temp.tm_min = mark[1];
-    if(adding.type != 'd' && adding.type != 'w') temp.tm_mday = mark[4];
-
-    else if(adding.type == 'w'){
-        int weekday = mark[4] - 1;
-        int diff = temp.tm_wday - weekday;
-        temp.tm_mday -= diff;
+    if(isConflicted(adding,recurs)){
+        string ensure;
+        cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
+        cout << "| For not continuing    Enter no      |\n";
+        cout << "| For yes               Enter any key |\n";
+        cout << "-----------------------------------------------------------------------\n";
+        getline(cin,ensure);
+        ensure = toupperString(ensure);
+        
+        if(ensure == "NO") return;
     }
 
-    if(adding.type == 'y'){
-        temp.tm_mon = mark[5];
-        temp.tm_mon--;
-    }
-
-    adding.begin = mktime(&temp);
-
-    temp.tm_hour = mark[2];
-    temp.tm_min = mark[3];
-    adding.end = mktime(&temp);
-    adding.update();
-
-    cout << "|   Enter name   | : ";
-    getline(cin, element);
-    adding.name = element;
-
-    cout << "|  Enter author  | : ";
-    getline(cin, element);
-    adding.author = element;
-
-    cout << "| Enter location | : ";
-    getline(cin, element);
-    adding.location = element;
+    adding.name = cinName();
+    adding.author = cinAuthor();
+    adding.location = cinLocation();
 
     recurs.push_back(adding);
 }
@@ -1049,11 +634,7 @@ void editRecur(int i){
         else cout << "Invalid input Please try again: " ;
     }
 
-    time_t currentTime = time(0);
-    tm temp = *localtime(&currentTime);
     Recur editing;
-    string element;
-    stringstream sso;
     int stage;
     int mark[6] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
     //begin hr, begin min, end hr, end min, date, month
@@ -1061,184 +642,27 @@ void editRecur(int i){
     switch(number){
         case 1 :
             // I literally copied this from addRecur, so it ain't much work, prof.
-            editing = recurs[i];
-            cout << "\n| Enter recursion type |\n\n";
-            cout << "| For daily      Enter 1 |\n";
-            cout << "| For weekly     Enter 2 |\n";
-            cout << "| For monthly    Enter 3 |\n";
-            cout << "| For yearly     Enter 4 |\n";
-            cout << "-----------------------------------------------------------------------\n";
-            cout << "Your input : ";
-            while(true){
-                getline(cin,element);
-                switch(atoi(element.c_str())){
-                case 1:
-                    editing.type = 'd';
-                    goto exit_loop_editRecur1;
-                
-                case 2:
-                    editing.type = 'w';
-                    goto exit_loop_editRecur1;
-
-                case 3:
-                    editing.type = 'm';
-                    goto exit_loop_editRecur1;
-
-                case 4:
-                    editing.type = 'y';
-                    goto exit_loop_editRecur1;
-                
-                default:
-                    cout << "\nInvalid input Please try again: ";
-                }
-            }
-            exit_loop_editRecur1: ;
-
+            editing.type = cinType();
             cout << '\n';
+            cinMark(mark, stage, editing.type);
 
-            while(true){
-                for(int i = 0; i < 6; i++){
-                    if(mark[i] == INT_MIN){
-                        stage = i;
-                        break;
-                    }
-                }
+            editing = MarkToRecur(mark, editing.type);
 
-                // recieving inputs
-                switch(stage){
-                    case 0:
-                        cout << "|  Enter beginning hour  | : ";
-                        break;
-                    case 1:
-                        cout << "| Enter beginning minute | : ";
-                        break;
-                    case 2:
-                        cout << "|   Enter ending hour    | : ";
-                        break;
-                    case 3: 
-                        cout << "|  Enter ending minute   | : ";
-                        break;
-                case 4:
-                    switch(editing.type){
-                    case 'w':
-                        cout << "| Enter weekday |\n";
-                        cout << "| For Sunday       Enter 1 |\n";
-                        cout << "| For Monday       Enter 2 |\n";
-                        cout << "| For Tuesday      Enter 3 |\n";
-                        cout << "| For Wednesday    Enter 4 |\n";
-                        cout << "| For Thursday     Enter 5 |\n";
-                        cout << "| For Friday       Enter 6 |\n";
-                        cout << "| For Saturday     Enter 7 |\n";
-                        cout << "-----------------------------------------------------------------------\n";
-                        cout << "Your input : ";
-                        break;
-
-                    case 'm':
-                    case 'y':
-                        cout << "|       Enter date       | : ";
-                    }
-                    break;
-                case 5:
-                        cout << "|       Enter month      | :";
-                    break;
-                }
-
-                getline(cin,element);
-
-                if(!is_number(element)){
-                    cout << "Input must not contain letters.\n";
-                    continue;
-                }
-
-                sso.clear();
-                sso << element;
-                for(int i = stage; sso >> mark[i] && stage < 6; i++) stage++;
-
-                // checking invalid inputs
-                for(int i = 0; i < stage; i++){
-                    if(i == 4 && editing.type == 'w'){
-                        if(mark[4] >= 1 && mark[4] <= 7) continue;
-                        else{
-                            cout << "Event weekday must be a number between 1 to 7.\n";
-                            stage = 4;
-                            for(int j = 4; j < 6; j++) mark[j] = INT_MIN;
-                            break;
-                        }
-                    }
-                    else if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
-                    else if(mark[i] >= 0) continue;
-                    switch(i){
-                    case 0:
-                        cout << "Beginning hour must be a number more or equal to 0.\n";
-                        break;
-
-                    case 1:
-                        cout << "Beginning minute must be a number more or equal to 0.\n";
-                        break;
-
-                    case 2:
-                        cout << "Ending hour must be a number more or equal to 0.\n";
-                        break;
-
-                    case 3:
-                        cout << "Ending minute must be a number more or equal to 0.\n";
-                        break;
-                    
-                    case 4:
-                        if(editing.type == 'd') break;
-                        cout << "Event date must be a number more than 0.\n";
-                        break;
-
-                    case 5:
-                        if(editing.type != 'y') break;
-                        cout << "Event month must be a number more than 0.\n";
-                        break;
-                    }
-                    stage = i;
-                    for(int j = i; j < 6; j++) mark[j] = INT_MIN;
-                }
-
-                switch(editing.type){
-                case 'd':
-                    if(stage > 3) goto exit_loop_editRecur2;
-                    break;
-
-                case 'w':
-                case 'm':
-                    if(stage > 4) goto exit_loop_editRecur2;
-                    break;
-
-                case 'y':
-                    if(stage > 5) goto exit_loop_editRecur2;
-                    break;
-                }
-            }
-            exit_loop_editRecur2: ;
-
-            // converting to Recur  
-            temp.tm_sec = 0;
-            temp.tm_hour = mark[0];
-            temp.tm_min = mark[1];
-            if(editing.type != 'd' && editing.type != 'w') temp.tm_mday = mark[4];
-
-            else if(editing.type == 'w'){
-                int weekday = mark[4] - 1;
-                int diff = temp.tm_wday - weekday;
-                temp.tm_mday -= diff;
+            if(isConflicted(editing,recurs)){
+                string ensure;
+                cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
+                cout << "| For not continuing    Enter no      |\n";
+                cout << "| For yes               Enter any key |\n";
+                cout << "-----------------------------------------------------------------------\n";
+                getline(cin,ensure);
+                ensure = toupperString(ensure);
+                
+                if(ensure == "NO") return;
             }
 
-            if(editing.type == 'y'){
-                temp.tm_mon = mark[5];
-                temp.tm_mon--;
-            }
-
-            editing.begin = mktime(&temp);
-
-            temp.tm_hour = mark[2];
-            temp.tm_min = mark[3];
-            editing.end = mktime(&temp);
-            editing.update();
-            recurs[i] = editing;
+            recurs[i].type = editing.type;
+            recurs[i].begin = editing.begin;
+            recurs[i].end = editing.end;
             break;
 
         case 2 :
