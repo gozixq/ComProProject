@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iomanip>
 #include <cstdlib>
 #include <vector>
 #include <string>
@@ -166,9 +165,9 @@ string toupperString(string x)
     return x;
 }
 
-bool is_number(const string& s){
-    return !s.empty() && find_if(s.begin(), 
-        s.end(), [](unsigned char c) { return !(c >= 48 && c <= 57);}) == s.end();
+bool is_number(const std::string& s){
+    return !s.empty() && std::find_if(s.begin(), 
+        s.end(), [](unsigned char c) { return !(c >= '0' && c <= '9' || c == ' ' || c == '-');}) == s.end();
 }
 
 //print Date the result of matching 
@@ -266,11 +265,10 @@ void mainMenu(){
     string cmd;
     bool justEnter = true;
     while(true){
-        if (justEnter){
-            cout << left;
-            cout << setw(31) << "| To view events"          << "Enter 1    |\n";
-            cout << setw(31) << "| To view periodic events" << "Enter 2    |\n";
-            cout << setw(31) << "| To exit"                 << "Enter exit |\n";
+        if(justEnter){
+            cout << "| To view events             Enter 1    |\n";
+            cout << "| To view periodic events    Enter 2    |\n";
+            cout << "| To exit                    Enter exit |\n";
             cout << "-----------------------------------------------\n";
             cout << "Your input : ";
             justEnter = false;
@@ -301,7 +299,7 @@ void mainMenu(){
             return;
 
         }else{
-            cout << "\nInvalid input, please enter again : ";
+            cout << "\nInvalid input Please try again: ";
         }
     }
 }
@@ -317,25 +315,27 @@ void eventPage(){
             }else{
                 cout << "There are no any events.\n";
             }
-            cout << '\n';
-            cout << setw(45) << "| To return to previous page"  << "Enter return |\n";
-            cout << setw(45) << "| To add a new event"          << "Enter new    |\n";
-            cout << setw(45) << "| To delete all passed events" << "Enter pass   |\n";
-            if(events.size() != 0) cout << setw(45) << "| To select an event"   << "Enter its index NO. |\n";
+            cout << "\n| To return to previous page     Enter return |\n";
+            cout <<   "| To add a new event             Enter new    |\n";
+            cout <<   "| To delete all passed events    Enter pass   |\n";
+            if(events.size() != 0) 
+                cout << "| To select an event             Enter its index NO. |\n";
             cout << "-----------------------------------------------------------------------\n";
             cout << "Your input : ";
             justEnter = false;
         }
 
-
         getline(cin, cmd);
-        cmd = toupperString(cmd);    
-        if(atoi(cmd.c_str()) > 0 && atoi(cmd.c_str()) <= events.size()){
+        cmd = toupperString(cmd);
+        int number = atoi(cmd.c_str());
+        if(!is_number(cmd)) number = 0;
+        if(number >= 1 && number <= events.size()){
             system("CLS");
             interactEvent(atoi(cmd.c_str())-1);
             justEnter = true;
         
         }else if(cmd == "NEW"){
+            system("CLS");
             addEvent();
             system("CLS");
             cout << "| Adding new event completed |\n";
@@ -352,7 +352,7 @@ void eventPage(){
         }else if(cmd == "RETURN"){
             return;
         }else{
-            cout << "\nInvalid input, please enter again : ";
+            cout << "\nInvalid input Please try again: ";
         }
         sortEvent();
         updateEvents();
@@ -367,7 +367,7 @@ void addEvent(){
     Event adding;
     string element;
     stringstream sso;
-    cout << "\n\n";
+
     while(true){
         for(int i = 0; i < 7; i++){
             if(mark[i] == INT_MIN){
@@ -414,7 +414,6 @@ void addEvent(){
         for(int i = stage; sso >> mark[i] && stage < 7; i++) stage++;
 
         // checking invalid inputs
-        cout << "element : " << element << '\n';
         for(int i = 0; i < stage; i++){
             if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
             else if(i == 6) {if(mark[6] > 1970) continue;}
@@ -447,9 +446,9 @@ void addEvent(){
         }
 
         // checking if the program can break the loop
-        if(stage > 6) goto exit_loop0;
+        if(stage > 6) goto exit_loop_addEvent;
     }
-    exit_loop0: ;
+    exit_loop_addEvent: ;
 
     // converting to Event
     temp.tm_sec = 0;
@@ -486,17 +485,15 @@ void interactEvent(int i){
     string cmd;
     cout << "| Selected event |\n";
     printEvent(i);
-    cout << '\n' << left;
-    cout << setw(45) << "| To return to previous page" << "Enter return   |\n";
-    cout << setw(45) << "| To edit selected event"     << "Enter edit     |\n";
-    cout << setw(45) << "| To delete selected event"   << "Enter del      |\n";
-    cout << setw(45) << "| To vote the time period"    << "Enter votetime |\n";
-    cout << setw(45) << "| To vote the location"       << "Enter voteloc  |\n";
+    cout << "\n| To return to previous page    Enter return   |\n";
+    cout <<   "| To edit selected event        Enter edit     |\n";
+    cout <<   "| To delete selected event      Enter del      |\n";
+    cout <<   "| To vote the time period       Enter votetime |\n";
+    cout <<   "| To vote the location          Enter voteloc  |\n";
     cout << "-----------------------------------------------------------------------\n";
     cout << "Your input : ";
 
-    while(true){
-        getline(cin,cmd);
+    while(getline(cin,cmd)){
         cmd = toupperString(cmd);
         if(cmd == "EDIT"){
             system("CLS");
@@ -507,7 +504,6 @@ void interactEvent(int i){
             break;
 
         }else if(cmd == "DEL"){
-            system("CLS");
             deleteEvent(i);
             system("CLS");
             cout << "The selected event has been deleted.\n";
@@ -534,57 +530,163 @@ void interactEvent(int i){
             system("CLS");
             break;
         }else{
-            cout << "\nInvalid input, please enter again : ";
+            cout << "\nInvalid input Please try again: ";
         }
     }
 }
 
-// If possible, add these functions here!
 void editEvent(int i){
 
     int number ;
-    string name,author,location ;
-    Event event ;
-    cout << "| To edit name     Press 1 |" << endl ;
-    cout << "| To edit author   Press 2 |" << endl ;
-    cout << "| To edit location Press 3 |" << endl ;
-   
+    string str;
+    cout << "| Editing event |\n";
+    printEvent(i);
+    cout << '\n';
+    cout << "| To edit time period    Press 1 |" << endl ;
+    cout << "| To edit name           Press 2 |" << endl ;
+    cout << "| To edit author         Press 3 |" << endl ;
+    cout << "| To edit location       Press 4 |" << endl ;
+    cout << "-----------------------------------------------------------------------\n";
     cout << "Press number: "  ;
-    cin >> number ;
-    cin.ignore() ;
+    while(getline(cin,str)){
+        number = atoi(str.c_str());
+        if(!is_number(str)) number = 0;
+        if(number >= 1 && number <= 4) break;
+        else cout << "Invalid input Please try again: " ;
+    }
+
+    tm temp;
+    int mark[7] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
+    //begin hr, begin min, end hr, end min, date, month, year
+    int stage;
+    Event editing;
+    string element;
+    stringstream sso;
 
     switch(number){
         case 1 :
-            cout << "Enter event name that you want to edit: " ;
-            getline(cin,name) ;
-            event.name = name ;
-            break ;
+            cout << "\n\n";
+            editing = events[i];
+            while(true){
+                for(int i = 0; i < 7; i++){
+                    if(mark[i] == INT_MIN){
+                        stage = i;
+                        break;
+                    }
+                }
+
+                // recieving inputs
+                switch(stage){
+                case 0:
+                    cout << "|  Enter beginning hour  | : ";
+                    break;
+                case 1:
+                    cout << "| Enter beginning minute | : ";
+                    break;
+                case 2:
+                    cout << "|   Enter ending hour    | : ";
+                    break;
+                case 3: 
+                    cout << "|  Enter ending minute   | : ";
+                    break;
+                case 4:
+                    cout << "|       Enter date       | : ";
+                    break;
+                case 5:
+                    cout << "|       Enter month      | : ";
+                    break;
+                case 6:
+                    cout << "|       Enter year       | : ";
+                    break;    
+                }
+
+                element.clear();
+                sso.clear();
+                getline(cin,element);
+
+                if(!is_number(element)){
+                    cout << "Input must not contain letters.\n";
+                    continue;
+                }
+
+                sso << element;
+                for(int i = stage; sso >> mark[i] && stage < 7; i++) stage++;
+
+                // checking invalid inputs
+                for(int i = 0; i < stage; i++){
+                    if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
+                    else if(i == 6) {if(mark[6] > 1970) continue;}
+                    else if(mark[i] >= 0) continue;
+                    switch(i){
+                    case 0:
+                        cout << "Beginning hour must be a number more or equal to 0.\n";
+                        break;
+                    case 1:
+                        cout << "Beginning minute must be a number more or equal to 0.\n";
+                        break;
+                    case 2:
+                        cout << "Ending hour must be a number more or equal to 0.\n";
+                        break;
+                    case 3:
+                        cout << "Ending minute must be a number more or equal to 0.\n";
+                        break;
+                    case 4:
+                        cout << "Event date must be a number more than 0.\n";
+                        break;
+                    case 5:
+                        cout << "Event month must be a number more than 0.\n";
+                        break;
+                    case 6:
+                        cout << "Event year must be a number more than 1970.\n";
+                        break; 
+                    }
+                    stage = i;
+                    for(int j = i; i < 6; i++) mark[j] = INT_MIN;
+                }
+
+                // checking if the program can break the loop
+                if(stage > 6) goto exit_loop_editEvent;
+            }
+            exit_loop_editEvent: ;
+
+            // converting to Event
+            temp.tm_sec = 0;
+            temp.tm_hour = mark[0];
+            temp.tm_min = mark[1];
+            temp.tm_mday = mark[4];
+            temp.tm_mon = mark[5];
+            temp.tm_year = mark[6];
+            temp.tm_mon--;
+            temp.tm_year -= 1900;
+            editing.begin = mktime(&temp);
+
+            if(mark[0] + mark[1]/60. > mark[2] + mark[3]/60.) mark[4] += 1;
+            temp.tm_hour = mark[2];
+            temp.tm_min = mark[3];
+            editing.end = mktime(&temp);
+            events[i] = editing;
+            break;
+
         case 2 :
-            cout << "Enter event author that you want to edit: " ;
-            getline(cin,author) ;
-            event.author = author ;
+            cout << "Enter event name that you want to edit: " ;
+            getline(cin,str) ;
+            events[i].name = str;
             break ;
         case 3 :
             cout << "Enter event author that you want to edit: " ;
-            getline(cin,location) ;
-            event.location = location ;
+            getline(cin,str) ;
+            events[i].author = str;
             break ;
-        default :
-            cout << "Invalid input Please try again" ;
-
+        case 4 :
+            cout << "Enter event location that you want to edit: " ;
+            getline(cin,str) ;
+            events[i].location = str;
+            break ;
     }
-    
-  
-    events.erase(events.begin()+i) ;
-    events.insert(events.begin()+i,event) ;
-      
-
 }
 
 void deleteEvent(int i){
-    
     events.erase(events.begin()+i) ;
-     
 }
 
 void voteTime(int i){
@@ -627,9 +729,6 @@ void voteLocation(int i){
         cout <<  "Votes of disagree got " << vote2.size() << endl ;
         cout << "-------------------------------------------" << endl ;
     }
-   
-
-
 
 }
 
@@ -655,17 +754,20 @@ void recurPage(){
                 cout << "There are no any periodic events.\n";
             }
 
-            cout << left << '\n';
-            cout << setw(45) << "| To return to previous page" <<  "Enter return |\n";
-            cout << setw(45) << "| To add a new periodic event" << "Enter new    |\n";
+            cout << "\n| To return to previous page     Enter return |\n";
+            cout <<   "| To add a new periodic event    Enter new    |\n";
+            if(recurs.size() != 0) 
+                cout << "| To select an event             Enter its index NO. |\n";
             cout << "-----------------------------------------------------------------------\n";
             cout << "Your input : ";
             justEnter = false;
         }
 
         getline(cin, cmd);
-        cmd = toupperString(cmd);    
-        if(atoi(cmd.c_str()) >= 1 && atoi(cmd.c_str()) <= recurs.size()){
+        cmd = toupperString(cmd);
+        int number = atoi(cmd.c_str());
+        if(!is_number(cmd)) number = 0;
+        if(number >= 1 && number <= recurs.size()){
             system("CLS");
             interactRecur(atoi(cmd.c_str())-1);
             justEnter = true;
@@ -674,13 +776,14 @@ void recurPage(){
             system("CLS");
             addRecur();
             system("CLS");
-            cout << "Adding new periodic event completed\n\n";
+            cout << "Adding new periodic event completed\n";
+            cout << "-----------------------------------------------------------------------\n\n";
             justEnter = true;
         
         }else if(cmd == "RETURN"){
             return;
         }else{
-            cout << "\nInvalid input, please enter again : ";
+            cout << "\nInvalid input Please try again: ";
         }
         sortRecur();
         updateRecurs();
@@ -694,12 +797,11 @@ void addRecur(){
     string element;
     stringstream sso;
 
-    cout << left;
     cout << "| Enter recursion type |\n\n";
-    cout << setw(15) << "| For daily,"   << "enter 1 |\n";
-    cout << setw(15) << "| For weekly,"  << "enter 2 |\n";
-    cout << setw(15) << "| For monthly," << "enter 3 |\n";
-    cout << setw(15) << "| For yearly,"  << "enter 4 |\n";
+    cout << "| For daily      Enter 1 |\n";
+    cout << "| For weekly     Enter 2 |\n";
+    cout << "| For monthly    Enter 3 |\n";
+    cout << "| For yearly     Enter 4 |\n";
     cout << "-----------------------------------------------------------------------\n";
     cout << "Your input : ";
     while(true){
@@ -707,25 +809,25 @@ void addRecur(){
         switch(atoi(element.c_str())){
         case 1:
             adding.type = 'd';
-            goto exit_loop1;
+            goto exit_loop_addRecur1;
         
         case 2:
             adding.type = 'w';
-            goto exit_loop1;
+            goto exit_loop_addRecur1;
 
         case 3:
             adding.type = 'm';
-            goto exit_loop1;
+            goto exit_loop_addRecur1;
 
         case 4:
             adding.type = 'y';
-            goto exit_loop1;
+            goto exit_loop_addRecur1;
         
         default:
-            cout << "\nInvalid input, please enter again : ";
+            cout << "\nInvalid input Please try again: ";
         }
     }
-    exit_loop1: ;
+    exit_loop_addRecur1: ;
 
     int stage;
     int mark[6] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
@@ -742,41 +844,40 @@ void addRecur(){
 
         // recieving inputs
         switch(stage){
-        case 0:
-            cout << setw(30) << "| Enter beginning hour |" << " : ";
-            break;
-        case 1:
-            cout << setw(30) << "| Enter beginning minute |" << " : ";
-            break;
-        case 2:
-            cout << setw(30) << "| Enter ending hour |" << " : ";
-            break;
-        case 3: 
-            cout << setw(30) << "| Enter ending minute |" << " : ";
-            break; 
+            case 0:
+                cout << "|  Enter beginning hour  | : ";
+                break;
+            case 1:
+                cout << "| Enter beginning minute | : ";
+                break;
+            case 2:
+                cout << "|   Enter ending hour    | : ";
+                break;
+            case 3: 
+                cout << "|  Enter ending minute   | : ";
+                break;
         case 4:
             switch(adding.type){
             case 'w':
-                cout << left;
                 cout << "| Enter weekday |\n";
-                cout << setw(15) << "| For Sunday"    << "Enter 1 |\n";
-                cout << setw(15) << "| For Monday"    << "Enter 2 |\n";
-                cout << setw(15) << "| For Tuesday"   << "Enter 3 |\n";
-                cout << setw(15) << "| For Wednesday" << "Enter 4 |\n";
-                cout << setw(15) << "| For Thursday"  << "Enter 5 |\n";
-                cout << setw(15) << "| For Friday"    << "Enter 6 |\n";
-                cout << setw(15) << "| For Saturday"  << "Enter 7 |\n";
+                cout << "| For Sunday       Enter 1 |\n";
+                cout << "| For Monday       Enter 2 |\n";
+                cout << "| For Tuesday      Enter 3 |\n";
+                cout << "| For Wednesday    Enter 4 |\n";
+                cout << "| For Thursday     Enter 5 |\n";
+                cout << "| For Friday       Enter 6 |\n";
+                cout << "| For Saturday     Enter 7 |\n";
                 cout << "-----------------------------------------------------------------------\n";
                 cout << "Your input : ";
                 break;
 
             case 'm':
             case 'y':
-                cout << "| Enter date  | : ";
+                cout << "|       Enter date       | : ";
             }
             break;
         case 5:
-            cout <<     "| Enter month | : ";
+            cout << "|       Enter month      | : ";
             break;
         }
 
@@ -837,20 +938,20 @@ void addRecur(){
 
         switch(adding.type){
         case 'd':
-            if(stage > 3) goto exit_loop2;
+            if(stage > 3) goto exit_loop_addRecur2;
             break;
 
         case 'w':
         case 'm':
-            if(stage > 4) goto exit_loop2;
+            if(stage > 4) goto exit_loop_addRecur2;
             break;
 
         case 'y':
-            if(stage > 5) goto exit_loop2;
+            if(stage > 5) goto exit_loop_addRecur2;
             break;
         }
     }
-    exit_loop2: ;
+    exit_loop_addRecur2: ;
 
     // converting to Recur  
     temp.tm_sec = 0;
@@ -893,18 +994,16 @@ void addRecur(){
 
 void interactRecur(int i){
     string cmd;
-    cout << left;
     cout << "| Selected periodic event |\n";
     printRecur(i);
     cout << '\n';
-    cout << setw(45) << "| To return to previous page"            << "Enter return |\n";
-    cout << setw(45) << "| To edit the selected periodic event"   << "Enter edit   |\n";
-    cout << setw(45) << "| To delete the selected periodic event" << "Enter del    |\n";
+    cout << "| To return to previous page               Enter return |\n";
+    cout << "| To edit the selected periodic event      Enter edit   |\n";
+    cout << "| To delete the selected periodic event    Enter del    |\n";
     cout << "-----------------------------------------------------------------------\n";
     cout << "Your input : ";
 
-    while(true){
-        getline(cin,cmd);
+    while(getline(cin,cmd)){
         cmd = toupperString(cmd);
         if(cmd == "EDIT"){
             system("CLS");
@@ -915,7 +1014,6 @@ void interactRecur(int i){
             break;
 
         }else if(cmd == "DEL"){
-            system("CLS");
             deleteRecur(i);
             system("CLS");
             cout << "| The selected event has been deleted. |\n";
@@ -926,60 +1024,243 @@ void interactRecur(int i){
             system("CLS");
             break;
         }else{
-            cout << "\nInvalid input, please enter again : ";
+            cout << "\nInvalid input Please try again: ";
         }
     }
 }
 
-// If possible, add these functions here!
 void editRecur(int i){
     
     int number ;
-    string name,author,location ;
-    Recur recur ;
-    cout << "| To edit name     Press 1 |" << endl ;
-    cout << "| To edit author   Press 2 |" << endl ;
-    cout << "| To edit location Press 3 |" << endl ;
-   
+    string str;
+    cout << "| Editing event |\n";
+    printRecur(i);
+    cout << '\n';
+    cout << "| To edit time period    Press 1 |" << endl ;
+    cout << "| To edit name           Press 2 |" << endl ;
+    cout << "| To edit author         Press 3 |" << endl ;
+    cout << "| To edit location       Press 4 |" << endl ;
+    cout << "-----------------------------------------------------------------------\n";
     cout << "Press number: "  ;
-    cin >> number ;
-    cin.ignore() ;
+    while(getline(cin,str)){
+        number = atoi(str.c_str());
+        if(!is_number(str)) number = 0;
+        if(number >= 1 && number <= 4) break;
+        else cout << "Invalid input Please try again: " ;
+    }
+
+    time_t currentTime = time(0);
+    tm temp = *localtime(&currentTime);
+    Recur editing;
+    string element;
+    stringstream sso;
+    int stage;
+    int mark[6] = {INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN,INT_MIN};
+    //begin hr, begin min, end hr, end min, date, month
 
     switch(number){
         case 1 :
-            cout << "Enter event name that you want to edit: " ;
-            getline(cin,name) ;
-            recur.name = name ;
-            break ;
+            // I literally copied this from addRecur, so it ain't much work, prof.
+            editing = recurs[i];
+            cout << "\n| Enter recursion type |\n\n";
+            cout << "| For daily      Enter 1 |\n";
+            cout << "| For weekly     Enter 2 |\n";
+            cout << "| For monthly    Enter 3 |\n";
+            cout << "| For yearly     Enter 4 |\n";
+            cout << "-----------------------------------------------------------------------\n";
+            cout << "Your input : ";
+            while(true){
+                getline(cin,element);
+                switch(atoi(element.c_str())){
+                case 1:
+                    editing.type = 'd';
+                    goto exit_loop_editRecur1;
+                
+                case 2:
+                    editing.type = 'w';
+                    goto exit_loop_editRecur1;
+
+                case 3:
+                    editing.type = 'm';
+                    goto exit_loop_editRecur1;
+
+                case 4:
+                    editing.type = 'y';
+                    goto exit_loop_editRecur1;
+                
+                default:
+                    cout << "\nInvalid input Please try again: ";
+                }
+            }
+            exit_loop_editRecur1: ;
+
+            cout << '\n';
+
+            while(true){
+                for(int i = 0; i < 6; i++){
+                    if(mark[i] == INT_MIN){
+                        stage = i;
+                        break;
+                    }
+                }
+
+                // recieving inputs
+                switch(stage){
+                    case 0:
+                        cout << "|  Enter beginning hour  | : ";
+                        break;
+                    case 1:
+                        cout << "| Enter beginning minute | : ";
+                        break;
+                    case 2:
+                        cout << "|   Enter ending hour    | : ";
+                        break;
+                    case 3: 
+                        cout << "|  Enter ending minute   | : ";
+                        break;
+                case 4:
+                    switch(editing.type){
+                    case 'w':
+                        cout << "| Enter weekday |\n";
+                        cout << "| For Sunday       Enter 1 |\n";
+                        cout << "| For Monday       Enter 2 |\n";
+                        cout << "| For Tuesday      Enter 3 |\n";
+                        cout << "| For Wednesday    Enter 4 |\n";
+                        cout << "| For Thursday     Enter 5 |\n";
+                        cout << "| For Friday       Enter 6 |\n";
+                        cout << "| For Saturday     Enter 7 |\n";
+                        cout << "-----------------------------------------------------------------------\n";
+                        cout << "Your input : ";
+                        break;
+
+                    case 'm':
+                    case 'y':
+                        cout << "|       Enter date       | : ";
+                    }
+                    break;
+                case 5:
+                        cout << "|       Enter month      | :";
+                    break;
+                }
+
+                getline(cin,element);
+
+                if(!is_number(element)){
+                    cout << "Input must not contain letters.\n";
+                    continue;
+                }
+
+                sso.clear();
+                sso << element;
+                for(int i = stage; sso >> mark[i] && stage < 6; i++) stage++;
+
+                // checking invalid inputs
+                for(int i = 0; i < stage; i++){
+                    if(i == 4 && editing.type == 'w'){
+                        if(mark[4] >= 1 && mark[4] <= 7) continue;
+                        else{
+                            cout << "Event weekday must be a number between 1 to 7.\n";
+                            stage = 4;
+                            for(int j = 4; j < 6; j++) mark[j] = INT_MIN;
+                            break;
+                        }
+                    }
+                    else if(i == 4 || i == 5) {if(mark[i] > 0) continue;}
+                    else if(mark[i] >= 0) continue;
+                    switch(i){
+                    case 0:
+                        cout << "Beginning hour must be a number more or equal to 0.\n";
+                        break;
+
+                    case 1:
+                        cout << "Beginning minute must be a number more or equal to 0.\n";
+                        break;
+
+                    case 2:
+                        cout << "Ending hour must be a number more or equal to 0.\n";
+                        break;
+
+                    case 3:
+                        cout << "Ending minute must be a number more or equal to 0.\n";
+                        break;
+                    
+                    case 4:
+                        if(editing.type == 'd') break;
+                        cout << "Event date must be a number more than 0.\n";
+                        break;
+
+                    case 5:
+                        if(editing.type != 'y') break;
+                        cout << "Event month must be a number more than 0.\n";
+                        break;
+                    }
+                    stage = i;
+                    for(int j = i; j < 6; j++) mark[j] = INT_MIN;
+                }
+
+                switch(editing.type){
+                case 'd':
+                    if(stage > 3) goto exit_loop_editRecur2;
+                    break;
+
+                case 'w':
+                case 'm':
+                    if(stage > 4) goto exit_loop_editRecur2;
+                    break;
+
+                case 'y':
+                    if(stage > 5) goto exit_loop_editRecur2;
+                    break;
+                }
+            }
+            exit_loop_editRecur2: ;
+
+            // converting to Recur  
+            temp.tm_sec = 0;
+            temp.tm_hour = mark[0];
+            temp.tm_min = mark[1];
+            if(editing.type != 'd' && editing.type != 'w') temp.tm_mday = mark[4];
+
+            else if(editing.type == 'w'){
+                int weekday = mark[4] - 1;
+                int diff = temp.tm_wday - weekday;
+                temp.tm_mday -= diff;
+            }
+
+            if(editing.type == 'y'){
+                temp.tm_mon = mark[5];
+                temp.tm_mon--;
+            }
+
+            editing.begin = mktime(&temp);
+
+            temp.tm_hour = mark[2];
+            temp.tm_min = mark[3];
+            editing.end = mktime(&temp);
+            editing.update();
+            recurs[i] = editing;
+            break;
+
         case 2 :
-            cout << "Enter event author that you want to edit: " ;
-            getline(cin,author) ;
-            recur.author = author ;
+            cout << "Enter event name that you want to edit: " ;
+            getline(cin,str) ;
+            recurs[i].name = str;
             break ;
         case 3 :
-            cout << "Enter event location that you want to edit: " ;
-            getline(cin,location) ;
-            recur.location = location ;
+            cout << "Enter event author that you want to edit: " ;
+            getline(cin,str) ;
+            recurs[i].author = str;
             break ;
-        default :
-            cout << "Invalid input Please try again" ;
-
+        case 4 :
+            cout << "Enter event location that you want to edit: " ;
+            getline(cin,str) ;
+            recurs[i].location = str;
+            break ;
     }
-    
-    
-    recurs.erase(recurs.begin()+i) ;
-    recurs.insert(recurs.begin()+i,recur) ;
-     
-
-
 }
 
 void deleteRecur(int i){
-
-    
     recurs.erase(recurs.begin()+i) ;
-      
-
 }
 
 void helpPage(){
