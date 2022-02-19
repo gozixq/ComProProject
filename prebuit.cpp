@@ -131,8 +131,9 @@ void PrintDate(vector<string> d,int N)
         }
 }
 
-vector<int> vote1 ;
-vector<int> vote2 ;
+vector<int> scorevoteloc ;
+vector<int> scorevotetime ;
+vector<string> locations ;
 
 // interface : pages and menus
 void mainMenu();
@@ -361,7 +362,7 @@ void interactEvent(int i){
 
         }else if(cmd == "VOTELOC" || cmd == "VOTE LOC" || cmd == "VOTELOCATION" || cmd == "VOTE LOCATION"){
             system("CLS");
-            voteLocation(i);
+            voteLocation();
             system("CLS");
             cout << "The selected event has been voted.\n";
             cout << "-----------------------------------------------------------------------\n\n";
@@ -448,81 +449,148 @@ void deleteEvent(int i){
 
 void voteTime(int i){
 
-    int number ;
-    string choice ;
+    int number,numchoice ;
+    string choice,letter ;
     printEvent(i);
     cout << "\n" ;
-    cout << "Please enter the number for vote " << events[i].begin << "to" << events[i].end  << endl ;
-    cout << "Press 1 for agree" << endl ;
-    cout << "Press 2 for disagree" << endl ;
-    do{
-        cout << "the number that you choose: " ;  
-        cin >> number ;
-        if(number != 1 && number != 2 ){
-            cout << "Invalid input,Please try again" << endl ;
+    cout << "-----------------------------------------" << endl ;
+    cout << "    Do you want to create choice?(y/n)   " << endl ;
+    cout << "-----------------------------------------" << endl ;
+    cout << "Please,enter letter y/n --> " ;
+    cin >> letter ;
+    
+    if(letter == "y" || letter == "Y"){
+        //locations.clear() ; ต้องเป็นtime
+        scorevotetime.clear() ;
+        cout << "How many choice you want to create? --> " ; 
+        cin >> numchoice ;
+        cout << "Please,enter times that you want to vote" << endl;
+        for(int i = 1 ;i <= numchoice;i++){
+            cout << "choice " << i << ": "  ;
+            //cin >>  ;  รับ input เป็นเวลา 
+            // ??????????????????????????????
         }
-    }while(number != 1 && number != 2);
-    
-
-    if(number == 1){
-        cout << "You vote agree to " << events[i].begin << "to" << events[i].end << endl ;
-        vote1.push_back(1) ;
-    }
-    if(number == 2){
-        cout << "You vote disagree to " << events[i].begin << "to" << events[i].end << endl ;
-        vote2.push_back(2) ;
+   
     }
     
-    cout << "Do you want to see the result? (y/n) :" ;
-    cin >> choice ;
+    system("CLS");
+    cout << "-----------------------------------------" << endl ;
+    cout << "    Do you want to vote time?(y/n)   " << endl ;
+    cout << "-----------------------------------------" << endl ;
+    cout << "Please,enter letter y/n --> " ;
+    cin >> letter ;
 
-    if(choice == "y"){
-        cout << "-------------------------------------------" << endl ;
-        cout << "\t\tVote Results" << endl ;
-        cout << "Votes of agree got " <<  vote1.size() << endl ;
-        cout <<  "Votes of disagree got " << vote2.size() << endl ;
-        cout << "-------------------------------------------" << endl ;
+    if(letter == "Y" || letter == "y"){
+        cout << "| -----------------------------------------  |" << endl ;
+        cout << "| Please,choose one of the following choices |" << endl ;
+        for(int i = 0 ;i < numchoice;i++){
+            //cout << "| choice " << i+1 << " = " <<  locations[i] << setw(30) << "|" << endl   ; ต้องเปลี่ยนตรงlocations[i]
+        }
+        cout << "| -----------------------------------------  |" << endl << endl ;
+        cout << "----Please enter the number for vote---- " << endl ;  
+        do{
+            cout << "the number that you choose: " ;  
+            cin >> number ;
+            if(number > numchoice){
+                cout << "Invalid input,Please try again" << endl ;
+            }
+        }while(number > numchoice);
+    
+        scorevotetime.push_back(number) ;
+    
+        cout << "Do you want to see the result? (y/n) :" ;
+        cin >> choice ;
+
+        //นับคะเเนนvote
+        if(choice == "y" || choice == "Y"){
+            cout << "-------------------------------------------" << endl ;
+            cout << "\t\tVote Results" << endl ;
+            for(int i = 0;i < numchoice;i++){
+                cout << "choice " << i+1 << " got " << count(scorevotetime.begin(),scorevotetime.end(),i+1) << endl ;
+            }
+            cout << "-------------------------------------------" << endl ;
+        }
+   
     }
+   
 }
 
 void voteLocation(int i){
 
-    int number ;
-    string choice ;
+    int number,numchoice ;
+    string choice,location,letter ;
+    cout << "-----------  Vote Location --------------" << endl ;
     printEvent(i);
     cout << "\n" ;
-    cout << "Please enter the number for vote " << events[i].location << endl ;
-    cout << "Press 1 for agree" << endl ;
-    cout << "Press 2 for disagree" << endl ;
-    do{
-        cout << "the number that you choose: " ;  
-        cin >> number ;
-        if(number != 1 && number != 2 ){
-            cout << "Invalid input,Please try again" << endl ;
+    //สร้างchoiceโดยสามารถสร้างกี่choiceก็ได้ 
+    cout << "-----------------------------------------" << endl ;
+    cout << "    Do you want to create choice?(y/n)   " << endl ;
+    cout << "-----------------------------------------" << endl ;
+    cout << "Please,enter letter y/n --> " ;
+    cin >> letter ;
+    
+    if(letter == "y" || letter == "Y"){
+        locations.clear() ;
+        scorevoteloc.clear() ;
+        cout << "How many choice you want to create? --> " ; 
+        cin >> numchoice ;
+        cout << "Please,enter locations that you want to vote" << endl;
+        for(int i = 1 ;i <= numchoice;i++){
+            cout << "choice " << i << ": "  ;
+            cin >> location ;
+            locations.push_back(location) ;
         }
-    }while(number != 1 && number != 2);
-    
-
-    if(number == 1){
-        cout << "You vote agree to " << events[i].location << endl ;
-        vote1.push_back(1) ;
-    }
-    if(number == 2){
-        cout << "You vote disagree to " << events[i].location << endl ;
-        vote2.push_back(2) ;
+   
     }
     
-    cout << "Do you want to see the result? (y/n) :" ;
-    cin >> choice ;
+    //เลือกchoice
+    system("CLS");
+    cout << "-----------------------------------------" << endl ;
+    cout << "    Do you want to vote location?(y/n)   " << endl ;
+    cout << "-----------------------------------------" << endl ;
+    cout << "Please,enter letter y/n --> " ;
+    cin >> letter ;
 
-    if(choice == "y"){
-        cout << "-------------------------------------------" << endl ;
-        cout << "\t\tVote Results" << endl ;
-        cout << "Votes of agree got " <<  vote1.size() << endl ;
-        cout <<  "Votes of disagree got " << vote2.size() << endl ;
-        cout << "-------------------------------------------" << endl ;
+    if(letter == "Y" || letter == "y"){
+        if(locations.size() != 0){
+            cout << "| -----------------------------------------  |" << endl ;
+            cout << "| Please,choose one of the following choices |" << endl ;
+            for(int i = 0 ;i < numchoice;i++){
+                cout << "| choice " << i+1 << " = " <<  locations[i] << setw(30) << "|" << endl   ;
+            }
+            cout << "| -----------------------------------------  |" << endl << endl ;
+            cout << "----Please enter the number for vote---- " << endl ;  
+            do{
+                cout << "the number that you choose: " ;  
+                cin >> number ;
+                if(number > numchoice){
+                    cout << "Invalid input,Please try again" << endl ;
+                }
+            }while(number > numchoice);
+    
+            scorevoteloc.push_back(number) ;
+    
+            cout << "Do you want to see the result? (y/n) :" ;
+            cin >> choice ;
+
+            //นับคะเเนนvote
+            if(choice == "y" || choice == "Y"){
+                cout << "-------------------------------------------" << endl ;
+                cout << "\t\tVote Results" << endl ;
+                for(int i = 0;i < numchoice;i++){
+                    cout << "choice " << i+1 << " got " << count(scorevoteloc.begin(),scorevoteloc.end(),i+1) << endl ;
+                }
+                cout << "-------------------------------------------" << endl ;
+            }
+
+        }else{
+            cout << "-------------------------------------------" << endl ;
+            cout << "       No-choice for vote location         " << endl ;
+            cout << "           Please try again                " << endl ;
+            cout << "-------------------------------------------" << endl ; 
+        }
+     
     }
-
 }
 
 void passEvent(){
