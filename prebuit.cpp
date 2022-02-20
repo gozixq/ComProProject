@@ -1,11 +1,12 @@
 #include "events.h" // All the commented libraries are already exist in events.h
-//#include <iostream>
+#include <iostream>
+#include <iomanip>
 #include <cstdlib>
-//#include <vector>
-//#include <string>
-//#include <sstream>
+#include <vector>
+#include <string>
+#include <sstream>
 #include <fstream>
-//#include <ctime>
+#include <ctime>
 #include <bits/stdc++.h>
 #include <map>
 
@@ -92,6 +93,19 @@ void printEvent(Date arr[],int n)
     }
 }
 
+string strPeriod(Event period){
+    tm temp[2] = {*localtime(&period.begin),*localtime(&period.end)};
+
+    string format[2] = {"%d/%m/%Y  from %H:%M to ","%H:%M"};
+    int size = format[0].size() + format[1].size() + 1;
+    char buffer[80];
+
+    strftime(buffer                   ,size,format[0].c_str(),&temp[0]);
+    strftime(buffer+format[0].size()+2,size,format[1].c_str(),&temp[1]);
+
+    string result = buffer;
+    return result;
+}
 
 //Converting a String to Upper
 string toupperString(string x)
@@ -101,6 +115,12 @@ string toupperString(string x)
         c = ::toupper(c);
     });
     return x;
+}
+
+int maxIdx(int arr[], int size){
+    int *max = max_element(arr, arr+size);
+    if(count(arr, arr+size, *max) > 1 ) return size;
+    else return (max-arr);
 }
 
 //print Date the result of matching 
@@ -130,10 +150,6 @@ void PrintDate(vector<string> d,int N)
             
         }
 }
-
-vector<int> scorevoteloc ;
-vector<int> scorevotetime ;
-vector<string> locations ;
 
 // interface : pages and menus
 void mainMenu();
@@ -308,7 +324,7 @@ void addEvent(){
         string ensure;
         cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
         cout << "| For not continuing    Enter no      |\n";
-        cout << "| For yes               Enter any key |\n";
+        cout << "| For continuing        Enter any key |\n";
         cout << "-----------------------------------------------------------------------\n";
         getline(cin,ensure);
         ensure = toupperString(ensure);
@@ -413,7 +429,7 @@ void editEvent(int i){
                 string ensure;
                 cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
                 cout << "| For not continuing    Enter no      |\n";
-                cout << "| For yes               Enter any key |\n";
+                cout << "| For continuing        Enter any key |\n";
                 cout << "-----------------------------------------------------------------------\n";
                 getline(cin,ensure);
                 ensure = toupperString(ensure);
@@ -447,149 +463,215 @@ void deleteEvent(int i){
     events.erase(events.begin()+i) ;
 }
 
-void voteTime(int i){
+void voteTime(int j){
+    vector<int> scorevotetime ;
+    vector<Event> periods = {events[j]};
 
     int number,numchoice ;
-    string choice,letter ;
-    printEvent(i);
-    cout << "\n" ;
-    cout << "-----------------------------------------" << endl ;
-    cout << "    Do you want to create choice?(y/n)   " << endl ;
-    cout << "-----------------------------------------" << endl ;
-    cout << "Please,enter letter y/n --> " ;
-    cin >> letter ;
-    
-    if(letter == "y" || letter == "Y"){
-        //locations.clear() ; ต้องเป็นtime
-        scorevotetime.clear() ;
-        cout << "How many choice you want to create? --> " ; 
-        cin >> numchoice ;
-        cout << "Please,enter times that you want to vote" << endl;
-        for(int i = 1 ;i <= numchoice;i++){
-            cout << "choice " << i << ": "  ;
-            //cin >>  ;  รับ input เป็นเวลา 
-            // ??????????????????????????????
-        }
-   
-    }
-    
-    system("CLS");
-    cout << "-----------------------------------------" << endl ;
-    cout << "    Do you want to vote time?(y/n)   " << endl ;
-    cout << "-----------------------------------------" << endl ;
-    cout << "Please,enter letter y/n --> " ;
-    cin >> letter ;
-
-    if(letter == "Y" || letter == "y"){
-        cout << "| -----------------------------------------  |" << endl ;
-        cout << "| Please,choose one of the following choices |" << endl ;
-        for(int i = 0 ;i < numchoice;i++){
-            //cout << "| choice " << i+1 << " = " <<  locations[i] << setw(30) << "|" << endl   ; ต้องเปลี่ยนตรงlocations[i]
-        }
-        cout << "| -----------------------------------------  |" << endl << endl ;
-        cout << "----Please enter the number for vote---- " << endl ;  
-        do{
-            cout << "the number that you choose: " ;  
-            cin >> number ;
-            if(number > numchoice){
-                cout << "Invalid input,Please try again" << endl ;
-            }
-        }while(number > numchoice);
-    
-        scorevotetime.push_back(number) ;
-    
-        cout << "Do you want to see the result? (y/n) :" ;
-        cin >> choice ;
-
-        //นับคะเเนนvote
-        if(choice == "y" || choice == "Y"){
-            cout << "-------------------------------------------" << endl ;
-            cout << "\t\tVote Results" << endl ;
-            for(int i = 0;i < numchoice;i++){
-                cout << "choice " << i+1 << " got " << count(scorevotetime.begin(),scorevotetime.end(),i+1) << endl ;
-            }
-            cout << "-------------------------------------------" << endl ;
-        }
-   
-    }
-   
-}
-
-void voteLocation(int i){
-
-    int number,numchoice ;
-    string choice,location,letter ;
-    cout << "-----------  Vote Location --------------" << endl ;
-    printEvent(i);
+    string numchoice_str ;
+    Event period;
+    cout << "--------------  Vote Time --------------" << endl ;
+    printEvent(j);
     cout << "\n" ;
     //สร้างchoiceโดยสามารถสร้างกี่choiceก็ได้ 
-    cout << "-----------------------------------------" << endl ;
-    cout << "    Do you want to create choice?(y/n)   " << endl ;
-    cout << "-----------------------------------------" << endl ;
-    cout << "Please,enter letter y/n --> " ;
-    cin >> letter ;
-    
-    if(letter == "y" || letter == "Y"){
-        locations.clear() ;
-        scorevoteloc.clear() ;
-        cout << "How many choice you want to create? --> " ; 
-        cin >> numchoice ;
-        cout << "Please,enter locations that you want to vote" << endl;
-        for(int i = 1 ;i <= numchoice;i++){
-            cout << "choice " << i << ": "  ;
-            cin >> location ;
-            locations.push_back(location) ;
+        
+    cout << "How many choices you want to create? --> " ; 
+    while(getline(cin,numchoice_str)){
+        numchoice = atoi(numchoice_str.c_str());
+        if(!is_number(numchoice_str)) numchoice = 0;
+        if(numchoice <= 0){
+            cout << "Invalid input, Please try again: ";
+        }else{
+            break;
         }
-   
+    }
+
+    cout << "Please enter periods that you want to vote" << endl;
+    int mark[7], stage;
+    for(int i = 1 ;i <= numchoice;i++){
+        for(int k = 0; k < i; k++) cout << "choice " << k+1 << ": "  << strPeriod(periods[k]) << endl ;
+        cout << "choice " << i+1 << ": \n\n";
+        stage = 0;
+        fill(mark, mark+7, INT_MIN);
+        cinMark(mark, stage);
+        period = MarkToEvent(mark);
+
+        if(isConflicted(period,events)){
+            string ensure;
+            cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
+            cout << "| For not continuing    Enter no      |\n";
+            cout << "| For continuing        Enter any key |\n";
+            cout << "-----------------------------------------------------------------------\n";
+            getline(cin,ensure);
+            ensure = toupperString(ensure);
+            
+            system("CLS");
+            if(ensure != "NO") periods.push_back(period);
+            else {cout << "The added period discarded." << endl ; i--;}
+        }else periods.push_back(period);
+    }
+    //เลือกchoice
+    system("CLS");
+    jump_votetime: ;
+    cout << "| -----------------------------------------  |" << endl ;
+    for(int i = 0 ;i < periods.size();i++){
+        cout << "| choice " << i+1 << " = " << left << setw(32) << strPeriod(periods[i]) << "|" << endl   ;
+    }
+    cout << "| -----------------------------------------  |" << endl << endl ;
+    cout << "----Please enter the number of votes---- " << endl ;  
+    do{
+        cout << "The number that you choose: " ;  
+        getline(cin,numchoice_str);
+        number = atoi(numchoice_str.c_str());
+        if(!is_number(numchoice_str)) number = 0;
+        if(number <= 0){
+            cout << "Invalid input, Please try again" << endl ;
+        }else break;
+    }while(true);
+
+    for(int i = 0; i < number; i++){
+        system("CLS");
+        cout << "| -----------------------------------------  |" << endl ;
+        cout << "| Please choose one of the following choices |" << endl ;
+        for(int i = 0 ;i < periods.size();i++){
+            cout << "| choice " << i+1 << " = " << left << setw(32) << strPeriod(periods[i]) << "|" << endl   ;
+        }
+        cout << "| -----------------------------------------  |" << endl << endl ;
+        cout << "----Please enter the number for voting---- " << endl ;  
+        do{
+            cout << "The chosen period: " ;
+            getline(cin,numchoice_str);
+            numchoice = atoi(numchoice_str.c_str());
+            if(!is_number(numchoice_str)) numchoice = 0;
+            if(numchoice > periods.size() || numchoice <= 0){
+                cout << "Invalid input, Please try again" << endl ;
+            }else{
+                scorevotetime.push_back(numchoice) ;
+                break ;
+            }
+        }while(true);
+    }
+
+    system("CLS");
+    cout << "-------------------------------------------" << endl ;
+    cout << "\t\tVote Results" << endl ;
+    int *votes = new int(periods.size());
+    for(int i = 0;i < periods.size();i++){
+        cout << "choice " << i+1 << " got " << count(scorevotetime.begin(),scorevotetime.end(),i+1) << endl ;
+        votes[i] = count(scorevotetime.begin(),scorevotetime.end(),i+1);
+    }
+    int idx = maxIdx(votes, periods.size());
+    if(idx == periods.size()){
+        cout << "There is a tie, Please vote again" << endl << endl ;
+        scorevotetime.clear();
+        fill(votes, votes+periods.size(), 0);
+        goto jump_votetime;
+    }
+    else{
+        cout << "\nThe location with the highest votes is: " << endl ;
+        cout << "| choice " << idx+1 << " = " << left << setw(32) << strPeriod(periods[idx]) << "|" << endl   ;
+        cout << "-------------------------------------------" << endl ;
+        events[j].begin = periods[idx].begin;
+        events[j].end = periods[idx].end;
+        delete [] votes;
+        return;
+    }
+}
+
+void voteLocation(int j){
+    vector<int> scorevoteloc ;
+    vector<string> locations = {events[j].location} ;
+
+    int number,numchoice ;
+    string choice,location,letter,numchoice_str ;
+    cout << "-----------  Vote Location --------------" << endl ;
+    printEvent(j);
+    cout << "\n" ;
+    //สร้างchoiceโดยสามารถสร้างกี่choiceก็ได้ 
+        
+    cout << "How many choices you want to create? --> " ; 
+    while(getline(cin,numchoice_str)){
+        numchoice = atoi(numchoice_str.c_str());
+        if(!is_number(numchoice_str)) numchoice = 0;
+        if(numchoice <= 0){
+            cout << "Invalid input, Please try again: ";
+        }else{
+            break;
+        }
+    }
+
+    cout << "Please enter locations that you want to vote" << endl;
+    cout << "choice 1: " << locations[0] << endl ;
+    for(int i = 1 ;i <= numchoice;i++){
+        cout << "choice " << i+1 << ": "  ;
+        getline(cin,location);
+        locations.push_back(location) ;
     }
     
     //เลือกchoice
     system("CLS");
-    cout << "-----------------------------------------" << endl ;
-    cout << "    Do you want to vote location?(y/n)   " << endl ;
-    cout << "-----------------------------------------" << endl ;
-    cout << "Please,enter letter y/n --> " ;
-    cin >> letter ;
+    jump_voteloc: ;
+    cout << "| -----------------------------------------  |" << endl ;
+    for(int i = 0 ;i < locations.size();i++){
+        cout << "| choice " << i+1 << " = " << left << setw(32) << locations[i] << "|" << endl   ;
+    }
+    cout << "| -----------------------------------------  |" << endl << endl ;
+    cout << "----Please enter the number of votes---- " << endl ;  
+    do{
+        cout << "The number that you choose: " ;  
+        getline(cin,numchoice_str);
+        number = atoi(numchoice_str.c_str());
+        if(!is_number(numchoice_str)) number = 0;
+        if(number <= 0){
+            cout << "Invalid input, Please try again" << endl ;
+        }else break;
+    }while(true);
 
-    if(letter == "Y" || letter == "y"){
-        if(locations.size() != 0){
-            cout << "| -----------------------------------------  |" << endl ;
-            cout << "| Please,choose one of the following choices |" << endl ;
-            for(int i = 0 ;i < numchoice;i++){
-                cout << "| choice " << i+1 << " = " <<  locations[i] << setw(30) << "|" << endl   ;
-            }
-            cout << "| -----------------------------------------  |" << endl << endl ;
-            cout << "----Please enter the number for vote---- " << endl ;  
-            do{
-                cout << "the number that you choose: " ;  
-                cin >> number ;
-                if(number > numchoice){
-                    cout << "Invalid input,Please try again" << endl ;
-                }
-            }while(number > numchoice);
-    
-            scorevoteloc.push_back(number) ;
-    
-            cout << "Do you want to see the result? (y/n) :" ;
-            cin >> choice ;
-
-            //นับคะเเนนvote
-            if(choice == "y" || choice == "Y"){
-                cout << "-------------------------------------------" << endl ;
-                cout << "\t\tVote Results" << endl ;
-                for(int i = 0;i < numchoice;i++){
-                    cout << "choice " << i+1 << " got " << count(scorevoteloc.begin(),scorevoteloc.end(),i+1) << endl ;
-                }
-                cout << "-------------------------------------------" << endl ;
-            }
-
-        }else{
-            cout << "-------------------------------------------" << endl ;
-            cout << "       No-choice for vote location         " << endl ;
-            cout << "           Please try again                " << endl ;
-            cout << "-------------------------------------------" << endl ; 
+    for(int i = 0; i < number; i++){
+        system("CLS");
+        cout << "| -----------------------------------------  |" << endl ;
+        cout << "| Please choose one of the following choices |" << endl ;
+        for(int i = 0 ;i < locations.size();i++){
+            cout << "| choice " << i+1 << " = " << left << setw(32) << locations[i] << "|" << endl   ;
         }
-     
+        cout << "| -----------------------------------------  |" << endl << endl ;
+        cout << "----Please enter the number for voting---- " << endl ;  
+        do{
+            cout << "The chosen location: " ;
+            getline(cin,numchoice_str);
+            numchoice = atoi(numchoice_str.c_str());
+            if(!is_number(numchoice_str)) numchoice = 0;
+            if(numchoice > locations.size() || numchoice <= 0){
+                cout << "Invalid input, Please try again" << endl ;
+            }else{
+                scorevoteloc.push_back(numchoice) ;
+                break ;
+            }
+        }while(true);
+    }
+
+    system("CLS");
+    cout << "-------------------------------------------" << endl ;
+    cout << "\t\tVote Results" << endl ;
+    int *votes = new int(locations.size());
+    for(int i = 0;i < locations.size();i++){
+        cout << "choice " << i+1 << " got " << count(scorevoteloc.begin(),scorevoteloc.end(),i+1) << endl ;
+        votes[i] = count(scorevoteloc.begin(),scorevoteloc.end(),i+1);
+    }
+    int idx = maxIdx(votes, locations.size());
+    if(idx == locations.size()){
+        cout << "There is a tie, Please vote again" << endl << endl ;
+        scorevoteloc.clear();
+        fill(votes, votes+locations.size(), 0);
+        goto jump_voteloc;
+    }
+    else{
+        cout << "\nThe location with the highest votes is: " << endl ;
+        cout << "| choice " << idx+1 << " = " << left << setw(32) << locations[idx] << "|" << endl   ;
+        cout << "-------------------------------------------" << endl ;
+        events[j].location = locations[idx];
+        delete [] votes;
+        return;
     }
 }
 
@@ -666,7 +748,7 @@ void addRecur(){
         string ensure;
         cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
         cout << "| For not continuing    Enter no      |\n";
-        cout << "| For yes               Enter any key |\n";
+        cout << "| For continuing        Enter any key |\n";
         cout << "-----------------------------------------------------------------------\n";
         getline(cin,ensure);
         ensure = toupperString(ensure);
@@ -756,7 +838,7 @@ void editRecur(int i){
                 string ensure;
                 cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
                 cout << "| For not continuing    Enter no      |\n";
-                cout << "| For yes               Enter any key |\n";
+                cout << "| For continuing        Enter any key |\n";
                 cout << "-----------------------------------------------------------------------\n";
                 getline(cin,ensure);
                 ensure = toupperString(ensure);
