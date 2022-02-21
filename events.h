@@ -304,7 +304,7 @@ void cinMark(int mark[6], int &stage, const char type){
                 break;
 
             case 5:
-                if(type == 'y' && mark[5] < 1970)
+                if(type == 'y' && mark[5] < 1)
                     cout << "Event month must be a number more than 0.\n";
                 else
                     goto jump_recur;
