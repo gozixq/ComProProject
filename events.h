@@ -25,13 +25,12 @@ class Recur{
         char type; // 'd' = daily, 'w' = weekly, 'm' = monthly, 'y' = yearly
         string name, author, location;
 
-        void update();
+        void update(time_t,bool);
 };
 
-void Recur::update(){
-    time_t currentTime = time(0);
+void Recur::update(time_t reference = time(0), bool avoid_conflict = true){
     tm temp = *localtime(&begin);
-    tm currentTM = *localtime(&currentTime);
+    tm currentTM = *localtime(&reference);
     int diff;
 
     temp.tm_year = currentTM.tm_year;
@@ -41,31 +40,35 @@ void Recur::update(){
         if(diff > 0) diff -= 7;
         temp.tm_mon = currentTM.tm_mon;
         temp.tm_mday = currentTM.tm_mday - diff;
-        if(diff == 0 && temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 7;
+        if(diff == 0 && temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.) && avoid_conflict) temp.tm_mday += 7;
         break;
 
     case 'd':
         temp.tm_mon = currentTM.tm_mon;
         temp.tm_mday = currentTM.tm_mday;
-        if(temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mday += 1;
+        if(temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.) && avoid_conflict) temp.tm_mday += 1;
         break;
     
     case 'm':
         temp.tm_mon = currentTM.tm_mon;
-        if (temp.tm_mday < currentTM.tm_mday) temp.tm_mon += 1;
-        else if (temp.tm_mday == currentTM.tm_mday){
-            if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1;
+        if(avoid_conflict){
+            if (temp.tm_mday < currentTM.tm_mday) temp.tm_mon += 1;
+            else if (temp.tm_mday == currentTM.tm_mday){
+                if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_mon += 1;
+            }
         }
         break;
     
     case 'y':
-        if (temp.tm_mon < currentTM.tm_mon) temp.tm_year += 1;
-        else if (temp.tm_mon == currentTM.tm_mon){
-            if (temp.tm_mday < currentTM.tm_mday) temp.tm_year += 1;
-            else if (temp.tm_mday == currentTM.tm_mday){
-                if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_year += 1;
+        if(avoid_conflict){
+            if (temp.tm_mon < currentTM.tm_mon) temp.tm_year += 1;
+            else if (temp.tm_mon == currentTM.tm_mon){
+                if (temp.tm_mday < currentTM.tm_mday) temp.tm_year += 1;
+                else if (temp.tm_mday == currentTM.tm_mday){
+                    if (temp.tm_hour+(temp.tm_min/60.) < currentTM.tm_hour+(currentTM.tm_min/60.)) temp.tm_year += 1;
+                }
+                break;
             }
-            break;
         }
     }
 
@@ -433,12 +436,19 @@ string cinLocation(){
     return element;
 }
 
-bool isConflicted(const Event& test, const vector<Event> events){
+bool isConflicted(const Event& test, vector<Event> events){
     return any_of(events.begin(),events.end(),
-    [&test](Event sieve) {return (max(test.begin,sieve.begin) <= min(test.end,sieve.end));});
+        [&test](Event sieve) {return (max(test.begin,sieve.begin) <= min(test.end,sieve.end));});
 }
 
-bool isConflicted(const Recur& test, const vector<Recur> recurs){
+bool isConflicted(const Event& test, vector<Recur> recurs){
+    for(unsigned int i = 0; i < recurs.size(); i++) recurs[i].update(test.begin,false);
     return any_of(recurs.begin(),recurs.end(),
-    [&test](Recur sieve) {return (max(test.begin,sieve.begin) <= min(test.end,sieve.end));});
+        [&test](Recur sieve) {return (max(test.begin,sieve.begin) <= min(test.end,sieve.end));});
+}
+
+bool isConflicted(const Recur& test, vector<Recur> recurs){
+    for(unsigned int i = 0; i < recurs.size(); i++) recurs[i].update(test.begin,false);
+    return any_of(recurs.begin(),recurs.end(),
+        [&test](Recur sieve) {return (max(test.begin,sieve.begin) <= min(test.end,sieve.end));});
 }
