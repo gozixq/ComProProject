@@ -200,7 +200,6 @@ void mainMenu();
         void interactRecur(int);
             void deleteRecur(int);
             void editRecur(int);
-    void helpPage();
 
 int main()
 {
@@ -272,12 +271,6 @@ void mainMenu(){
             system("CLS");
             recurPage();
             system("CLS");
-            justEnter = true;
-
-        }else if(cmd == "HELP"){
-            system("CLS");
-            helpPage();
-            system("CLS");            
             justEnter = true;
 
         }else if(cmd == "EXIT"){
@@ -907,17 +900,4 @@ void editRecur(int i){
 
 void deleteRecur(int i){
     recurs.erase(recurs.begin()+i) ;
-}
-
-void helpPage(){
-    //มาแก้ด่วย เราทำมั่วมากๆ 🤦‍♂️
-    cout << "What can you do with this program?\n";
-    cout << "This program manages events and let the users to create, delete, and even vote for events details.\n";
-    cout << "There are two types of events, normal events and periodic events.\n";
-    cout << "1. Normal events are events which start at a time end end at another time.\n";
-    cout << "2. Periodic events, are events which occur periodically, including dialy, weekly, monthly, and yearly.\n";
-
-    cin.get();
-    cin.ignore();
-    cout << "\nPress Enter to continue\n";
 }
