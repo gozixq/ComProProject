@@ -1,4 +1,4 @@
-#include "events.h" // All the commented libraries are already exist in events.h
+#include "events.h"
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -7,8 +7,6 @@
 #include <sstream>
 #include <fstream>
 #include <ctime>
-#include <bits/stdc++.h>
-#include <map>
 
 using namespace std;
 
@@ -17,82 +15,76 @@ vector<Event> events;
 vector<Recur> recurs;
 
 // import and write to .txt files
-void importEvents();
-void importRecurs();
-void updateEvents();
-void updateRecurs();
-
-// miscellaneous functions, newer functions will be added here
-void sortRecur();
-
-// ก่อนเรียกใช้ให้input data from txt เก็บในVector 
-//และหาความยาวจากint x = sizeof(arr)/sizeof(arr[0]);
-void printRecur(vector<string> d,int N)
-{
-    map<string, int> freqMap;
-       
-        for (auto& element : d) {
-            auto res
-                = freqMap.insert(pair<string, int>(element, 1));
-            if (res.second == false)
-                res.first->second++;
-                
-        }
-
-        for (auto& element : freqMap) 
-        {
-            if (element.second == N) 
-            {
-                cout << element.first << " " ;
-            }
-            
-        }
-
-}
-
-
-
-struct Date
-{
-    int day, month, year;
-    string event;
-};
-
-bool compare(const Date &d1, const Date &d2)
-{
+void importEvents(){
+    ifstream source("events.txt");
+    if(source.fail()) return;
     
-    if (d1.year < d2.year)
-        return true;
-    if (d1.year == d2.year && d1.month < d2.month)
-        return true;
-    if (d1.year == d2.year && d1.month == d2.month &&
-                              d1.day < d2.day)
-        return true;
-  
-    return false;
-}
+    string line;
+    Event temp;
+    while(getline(source,line)){
+        sscanf(line.c_str(), "%lld %lld", &temp.begin, &temp.end);
 
-// ก่อนเรียกใช้ให้input data from txt เก็บในลิส 
-//และให้รับค่าinputค่าจำนวนคนในกลุ่มจากผู้ใช้เก็บในค่า n;
-void sortEvent(Date arr[],int n)
-{
-    
-    sort(arr, arr+n, compare);
-}
+        getline(source,line);
+        temp.name = line;
 
-void printEvent(Date arr[],int n)
-{
-    
-    
-    cout << "Sorted event : " << endl;
-    for (int i=0; i<n; i++)
-    {
-       cout << arr[i].day << " " << arr[i].month
-            << " " << arr[i].year << " " << arr[i].event;
-       cout << endl;
+        getline(source,line);
+        temp.author = line;
+
+        getline(source,line);
+        temp.location = line;
+
+        events.push_back(temp);
     }
 }
 
+void importRecurs(){
+    ifstream source("recurs.txt");
+    if(source.fail()) return;
+    
+    string line;
+    Recur temp;
+    while(getline(source,line)){
+        sscanf(line.c_str(), "%lld %lld %c", &temp.begin, &temp.end, &temp.type);
+
+        getline(source,line);
+        temp.name = line;
+
+        getline(source,line);
+        temp.author = line;
+
+        getline(source,line);
+        temp.location = line;
+
+        recurs.push_back(temp);
+    }
+}
+
+void updateEvents(){
+    ofstream dest("events.txt");
+    for(unsigned int i = 0; i < events.size(); i++){
+        dest << events[i].begin << ' ';
+        dest << events[i].end << '\n';
+        dest << events[i].name << '\n';
+        dest << events[i].author << '\n';
+        dest << events[i].location << '\n';
+    }
+    dest.close();
+}
+
+void updateRecurs(){
+    ofstream dest("recurs.txt");
+    for(unsigned int i = 0; i < recurs.size(); i++){
+        dest << recurs[i].begin << ' ';
+        dest << recurs[i].end << ' ';
+        dest << recurs[i].type << '\n';
+        dest << recurs[i].name << '\n';
+        dest << recurs[i].author << '\n';
+        dest << recurs[i].location << '\n';
+    }
+    dest.close();
+}
+
+// miscellaneous functions, newer functions will be added here
 string strPeriod(Event period){
     tm temp[2] = {*localtime(&period.begin),*localtime(&period.end)};
 
@@ -107,7 +99,76 @@ string strPeriod(Event period){
     return result;
 }
 
-//Converting a String to Upper
+void printEvent(int i){
+    cout << left
+        << "[" << i+1 << "] : " 
+        << strPeriod(events[i]) << "    "
+        << "named " << setw(15) << events[i].name
+        << "authored by " << setw(15) << events[i].author
+        << "at " << events[i].location << '\n';
+}
+
+void printRecur(int i){
+    tm temp[2] = {*localtime(&recurs[i].begin), *localtime(&recurs[i].end)};
+
+    char buffer[3][20];
+
+    cout << "[" << i+1 << "] : Every ";
+    switch(recurs[i].type){
+    case 'd':
+        strftime(buffer[0],20,"day ",NULL);
+        break;
+    
+    case 'w':
+        strftime(buffer[0],20,"%A ",&temp[0]);
+        break;
+    
+    case 'm':
+        strftime(buffer[0],20,"month on day %dth",&temp[0]);
+        if(temp[0].tm_mday % 10 == 1 && temp[0].tm_mday != 11){
+            buffer[0][15] = 's';
+            buffer[0][16] = 't';
+        }else if(temp[0].tm_mday % 10 == 2 && temp[0].tm_mday != 12){
+            buffer[0][15] = 'n';
+            buffer[0][16] = 'd';
+        }
+        break;
+
+    case 'y':
+        strftime(buffer[0],20,"%B the %dth",&temp[0]);
+        char *p = find(buffer[0], buffer[0]+20, '\0');
+        if(temp[0].tm_mday % 10 == 1 && temp[0].tm_mday != 11){
+            *(p-2) = 's';
+            *(p-1) = 't';
+        }else if(temp[0].tm_mday % 10 == 2 && temp[0].tm_mday != 12){
+            *(p-2) = 'n';
+            *(p-1) = 'd';
+        }
+        break;
+    }
+
+    strftime(buffer[1],20,"from %H:%M ",&temp[0]);
+    strftime(buffer[2],20,"to %H:%M",&temp[1]);
+
+    cout << left << setw(20) << buffer[0]
+        << buffer[1]
+        << buffer[2] << "    "
+        << "named " << setw(15) << recurs[i].name
+        << "authored by " << setw(15) << recurs[i].author
+        << "at " << recurs[i].location << '\n';
+}
+
+void sortEvent(){
+    sort(events.begin(), events.end(), 
+        [](const Event &d1, const Event &d2){return difftime(d2.begin,d1.begin) > 0;});
+}
+
+void sortRecur(){
+    sort(recurs.begin(), recurs.end(), 
+        [](const Recur &d1, const Recur &d2){return difftime(d2.begin,d1.begin) > 0;});
+}
+
+//Converting a String to Uppercase
 string toupperString(string x)
 {
     for_each(x.begin(), x.end(), [](char & c) 
@@ -117,38 +178,11 @@ string toupperString(string x)
     return x;
 }
 
+//Returning index of the maximum value of an array
 int maxIdx(int arr[], int size){
     int *max = max_element(arr, arr+size);
-    if(count(arr, arr+size, *max) > 1 ) return size;
+    if(count(arr, arr+size, *max) > 1) return size;
     else return (max-arr);
-}
-
-//print Date the result of matching 
-//จะลบก็ได้นะซ้ำกับRecur
-void PrintDate(vector<string> d,int N)
-{
-    map<string, int> freqMap;
-       
-        for (auto& element : d) {
-            auto res
-                = freqMap.insert(pair<string, int>(element, 1));
-            if (res.second == false)
-                res.first->second++;
-                
-        }
-        
-        cout << "The date of appointment : ";
-        
-        
-        
-        for (auto& element : freqMap) 
-        {
-            if (element.second == N) 
-            {
-                cout << element.first << " " ;
-            }
-            
-        }
 }
 
 // interface : pages and menus
@@ -170,6 +204,7 @@ void mainMenu();
 
 int main()
 {
+    /*
     int N;
     
     vector<string> Date;
@@ -193,8 +228,8 @@ int main()
     cout << "Matching Time !!!" << endl;
     
     PrintDate(Date,N);
+    */
 
-/*
     importEvents();
     importRecurs();
 
@@ -208,7 +243,6 @@ int main()
     system("CLS");
 
     return 0;
-*/
 
 }
 
@@ -320,7 +354,7 @@ void addEvent(){
 
     adding = MarkToEvent(mark);
 
-    if(isConflicted(adding,events)){
+    if(isConflicted(adding,events) || isConflicted(adding,recurs)){
         string ensure;
         cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
         cout << "| For not continuing    Enter no      |\n";
@@ -372,15 +406,15 @@ void interactEvent(int i){
             system("CLS");
             voteTime(i);
             system("CLS");
-            cout << "The selected event has been voted.\n";
+            cout << "\nThe selected event has been voted.\n";
             cout << "-----------------------------------------------------------------------\n\n";
             break;
 
         }else if(cmd == "VOTELOC" || cmd == "VOTE LOC" || cmd == "VOTELOCATION" || cmd == "VOTE LOCATION"){
             system("CLS");
-            voteLocation();
+            voteLocation(i);
             system("CLS");
-            cout << "The selected event has been voted.\n";
+            cout << "\nThe selected event has been voted.\n";
             cout << "-----------------------------------------------------------------------\n\n";
             break;
 
@@ -425,7 +459,7 @@ void editEvent(int i){
 
             editing = MarkToEvent(mark);
 
-            if(isConflicted(editing,events)){
+            if(isConflicted(editing,events) || isConflicted(editing,recurs)){
                 string ensure;
                 cout << "\nThis event is conflicted with others. Are you sure to continue?\n";
                 cout << "| For not continuing    Enter no      |\n";
@@ -573,6 +607,7 @@ void voteTime(int j){
         cout << "-------------------------------------------" << endl ;
         events[j].begin = periods[idx].begin;
         events[j].end = periods[idx].end;
+        system("pause");
         delete [] votes;
         return;
     }
@@ -670,6 +705,7 @@ void voteLocation(int j){
         cout << "| choice " << idx+1 << " = " << left << setw(32) << locations[idx] << "|" << endl   ;
         cout << "-------------------------------------------" << endl ;
         events[j].location = locations[idx];
+        system("pause");
         delete [] votes;
         return;
     }
